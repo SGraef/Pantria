@@ -40,6 +40,15 @@ default: &default
     queue: default
     description: "Notify members about storage items expiring soon or just expired."
 
+  scan_loan_reminders:
+    class: ScanLoanRemindersJob
+    # Morning scan: if an upcoming calendar event mentions someone you have an
+    # outstanding loan with, remind you to bring it back / collect it. Deduped
+    # per loan/event/recipient.
+    schedule: every day at 8am
+    queue: default
+    description: "Remind about outstanding loans when meeting the other person soon."
+
 development:
   <<: *default
 
