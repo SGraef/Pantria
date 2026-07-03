@@ -37,7 +37,7 @@
                               style: "width:36px;height:36px;object-fit:cover;border-radius:var(--radius-sm);vertical-align:middle;margin-right:var(--sp-2)" %>
               <% end %>
             <% end %>
-            <%= loan.item %>
+            <%= link_to loan.item, loan_path(loan) %>
           </td>
           <td>
             <span class="pill" style="background:<%= tint %>"><%= t("loan.directions.#{loan.direction}") %></span>

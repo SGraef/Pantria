@@ -27,6 +27,16 @@ RSpec.describe "Loans" do
     end
   end
 
+  describe "GET /loans/:id" do
+    it "shows a single loan" do
+      loan = create(:loan, household: household, item: "Cordless drill", counterparty: "Anna")
+      get loan_path(loan)
+      expect(response).to have_http_status(:ok)
+      expect(response.body).to include("Cordless drill")
+      expect(response.body).to include("Anna")
+    end
+  end
+
   describe "GET /loans/new" do
     it "preselects the direction from the entry point" do
       get new_loan_path(direction: "lent")

@@ -5,7 +5,7 @@
 # calendar-meeting reminder (Reminders::LoanCalendarScanner).
 class LoansController < ApplicationController
   before_action :ensure_household
-  before_action :set_loan, only: %i[edit update destroy mark_returned reopen]
+  before_action :set_loan, only: %i[show edit update destroy mark_returned reopen]
 
   def index
     @show_returned = params[:show_returned] == "1"
@@ -13,6 +13,10 @@ class LoansController < ApplicationController
     scope = scope.outstanding unless @show_returned
     @loans = scope
     @returned_count = current_household.loans.returned.count
+  end
+
+  def show
+    authorize @loan
   end
 
   def new

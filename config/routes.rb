@@ -95,7 +95,7 @@ Rails.application.routes.draw do
   end
 
   # Borrowed / lent item tracking (+ calendar-meeting reminders).
-  resources :loans, only: %i[index new create edit update destroy] do
+  resources :loans, only: %i[index show new create edit update destroy] do
     member do
       post :mark_returned
       post :reopen
