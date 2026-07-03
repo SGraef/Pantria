@@ -8,13 +8,19 @@
 class Loan < ApplicationRecord
   DIRECTIONS = %w[borrowed lent].freeze
   STATUSES   = %w[outstanding returned].freeze
+  # Web-displayable image types accepted for the optional object photo.
+  PHOTO_MIME_TYPES = %w[image/jpeg image/png image/webp image/heic image/heif].freeze
 
   belongs_to :household
+
+  # Optional snapshot of the object, so you remember which "drill" this is.
+  has_one_attached :photo
 
   validates :item, presence: true, length: { maximum: 200 }
   validates :counterparty, presence: true, length: { maximum: 200 }
   validates :direction, inclusion: { in: DIRECTIONS }
   validates :status, inclusion: { in: STATUSES }
+  validate :photo_must_be_image
 
   before_validation :set_counterparty_key
 
@@ -47,5 +53,12 @@ class Loan < ApplicationRecord
 
   def set_counterparty_key
     self.counterparty_key = self.class.normalize(counterparty)
+  end
+
+  def photo_must_be_image
+    return unless photo.attached?
+    return if PHOTO_MIME_TYPES.include?(photo.blob.content_type)
+
+    errors.add(:photo, :invalid)
   end
 end

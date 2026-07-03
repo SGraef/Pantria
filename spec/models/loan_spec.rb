@@ -32,6 +32,25 @@ RSpec.describe Loan do
     end
   end
 
+  describe "photo attachment" do
+    it "accepts an image" do
+      loan = build(:loan)
+      loan.photo.attach(io: StringIO.new("fake"), filename: "drill.jpg", content_type: "image/jpeg")
+      expect(loan).to be_valid
+    end
+
+    it "rejects a non-image file" do
+      loan = build(:loan)
+      loan.photo.attach(io: StringIO.new("%PDF-1.4"), filename: "drill.pdf", content_type: "application/pdf")
+      expect(loan).not_to be_valid
+      expect(loan.errors.attribute_names).to include(:photo)
+    end
+
+    it "is valid without a photo" do
+      expect(build(:loan)).to be_valid
+    end
+  end
+
   describe "scopes" do
     it "separates outstanding/returned and borrowed/lent" do
       borrowed = create(:loan)

@@ -74,7 +74,7 @@ class LoansController < ApplicationController
   end
 
   def loan_params
-    params.require(:loan).permit(:item, :counterparty, :direction, :loaned_on, :due_on, :notes)
+    params.require(:loan).permit(:item, :counterparty, :direction, :loaned_on, :due_on, :notes, :photo)
   end
 
   def direction_param

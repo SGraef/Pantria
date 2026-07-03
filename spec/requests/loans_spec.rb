@@ -51,6 +51,16 @@ RSpec.describe "Loans" do
       post loans_path, params: { loan: { direction: "borrowed", item: "", counterparty: "" } }
       expect(response).to have_http_status(:unprocessable_content)
     end
+
+    it "attaches an uploaded photo" do
+      photo = Rack::Test::UploadedFile.new(StringIO.new("fake-jpeg"), "image/jpeg", original_filename: "drill.jpg")
+      post loans_path, params: { loan: {
+        direction: "borrowed", item: "Drill", counterparty: "Anna", photo: photo
+      } }
+
+      expect(response).to redirect_to(loans_path)
+      expect(Loan.last.photo).to be_attached
+    end
   end
 
   describe "member actions" do

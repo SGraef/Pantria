@@ -357,6 +357,8 @@ de:
       loaned_on: "Datum"
       due_on: "Rückgabe bis"
       notes: "Notiz"
+      photo: "Foto"
+      photo_help: "Ein Bild des Gegenstands – damit du weißt, um welches Objekt es geht."
 
   notices:
     product_saved:    "Produkt gespeichert."
