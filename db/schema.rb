@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2026_07_04_000004) do
+ActiveRecord::Schema[8.0].define(version: 2026_07_04_000006) do
   create_table "active_storage_attachments", charset: "utf8mb4", collation: "utf8mb4_0900_ai_ci", force: :cascade do |t|
     t.string "name", null: false
     t.string "record_type", null: false
@@ -110,7 +110,7 @@ ActiveRecord::Schema[8.0].define(version: 2026_07_04_000004) do
     t.index ["source_record_type", "source_record_id"], name: "index_calendar_events_on_source_record"
   end
 
-  create_table "documents", charset: "utf8mb4", collation: "utf8mb4_0900_ai_ci", force: :cascade do |t|
+  create_table "documents", charset: "utf8mb4", collation: "utf8mb4_unicode_ci", force: :cascade do |t|
     t.bigint "household_id", null: false
     t.bigint "user_id"
     t.string "title", null: false
@@ -137,7 +137,7 @@ ActiveRecord::Schema[8.0].define(version: 2026_07_04_000004) do
     t.index ["user_id"], name: "index_documents_on_user_id"
   end
 
-  create_table "garden_beds", charset: "utf8mb4", collation: "utf8mb4_0900_ai_ci", force: :cascade do |t|
+  create_table "garden_beds", charset: "utf8mb4", collation: "utf8mb4_unicode_ci", force: :cascade do |t|
     t.bigint "household_id", null: false
     t.string "name", null: false
     t.string "location"
@@ -145,11 +145,17 @@ ActiveRecord::Schema[8.0].define(version: 2026_07_04_000004) do
     t.text "notes"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.json "boundary"
+    t.decimal "width_m", precision: 6, scale: 2
+    t.decimal "length_m", precision: 6, scale: 2
+    t.decimal "pos_x_m", precision: 7, scale: 2
+    t.decimal "pos_y_m", precision: 7, scale: 2
+    t.decimal "area_sqm", precision: 8, scale: 2
     t.index ["household_id", "name"], name: "index_garden_beds_on_household_id_and_name"
     t.index ["household_id"], name: "index_garden_beds_on_household_id"
   end
 
-  create_table "garden_connections", charset: "utf8mb4", collation: "utf8mb4_0900_ai_ci", force: :cascade do |t|
+  create_table "garden_connections", charset: "utf8mb4", collation: "utf8mb4_unicode_ci", force: :cascade do |t|
     t.bigint "household_id", null: false
     t.text "api_key"
     t.string "hardiness_zone"
@@ -159,6 +165,22 @@ ActiveRecord::Schema[8.0].define(version: 2026_07_04_000004) do
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.index ["household_id"], name: "index_garden_connections_on_household_id", unique: true
+  end
+
+  create_table "garden_map_settings", charset: "utf8mb4", collation: "utf8mb4_unicode_ci", force: :cascade do |t|
+    t.bigint "household_id", null: false
+    t.string "mode", default: "map", null: false
+    t.string "bundesland", default: "ni"
+    t.decimal "center_lat", precision: 10, scale: 7
+    t.decimal "center_lng", precision: 10, scale: 7
+    t.integer "zoom"
+    t.string "custom_dop_url", limit: 500
+    t.string "custom_dop_layer"
+    t.string "custom_alkis_url", limit: 500
+    t.string "custom_alkis_layer"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["household_id"], name: "index_garden_map_settings_on_household_id", unique: true
   end
 
   create_table "grocery_items", charset: "utf8mb4", collation: "utf8mb4_0900_ai_ci", force: :cascade do |t|
@@ -370,7 +392,7 @@ ActiveRecord::Schema[8.0].define(version: 2026_07_04_000004) do
     t.index ["store_id"], name: "index_offers_on_store_id"
   end
 
-  create_table "paperless_connections", charset: "utf8mb4", collation: "utf8mb4_0900_ai_ci", force: :cascade do |t|
+  create_table "paperless_connections", charset: "utf8mb4", collation: "utf8mb4_unicode_ci", force: :cascade do |t|
     t.bigint "household_id", null: false
     t.string "base_url", null: false
     t.text "api_token"
@@ -383,7 +405,7 @@ ActiveRecord::Schema[8.0].define(version: 2026_07_04_000004) do
     t.index ["household_id"], name: "index_paperless_connections_on_household_id", unique: true
   end
 
-  create_table "plantings", charset: "utf8mb4", collation: "utf8mb4_0900_ai_ci", force: :cascade do |t|
+  create_table "plantings", charset: "utf8mb4", collation: "utf8mb4_unicode_ci", force: :cascade do |t|
     t.bigint "household_id", null: false
     t.bigint "garden_bed_id", null: false
     t.bigint "plant_id", null: false
@@ -402,7 +424,7 @@ ActiveRecord::Schema[8.0].define(version: 2026_07_04_000004) do
     t.index ["plant_id"], name: "index_plantings_on_plant_id"
   end
 
-  create_table "plants", charset: "utf8mb4", collation: "utf8mb4_0900_ai_ci", force: :cascade do |t|
+  create_table "plants", charset: "utf8mb4", collation: "utf8mb4_unicode_ci", force: :cascade do |t|
     t.bigint "household_id", null: false
     t.integer "perenual_id"
     t.string "common_name", null: false
@@ -817,6 +839,7 @@ ActiveRecord::Schema[8.0].define(version: 2026_07_04_000004) do
   add_foreign_key "documents", "users"
   add_foreign_key "garden_beds", "households"
   add_foreign_key "garden_connections", "households"
+  add_foreign_key "garden_map_settings", "households"
   add_foreign_key "grocery_items", "households"
   add_foreign_key "grocery_items", "products"
   add_foreign_key "grocery_items", "stores"
