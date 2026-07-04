@@ -1,0 +1,27 @@
+<%# Locals: connection, url, method (:post for new, :patch for edit). %>
+<%= form_with model: connection, url:, method:, local: true do |f| %>
+  <% if connection.errors.any? %>
+    <div class="flash alert"><%= connection.errors.full_messages.to_sentence %></div>
+  <% end %>
+
+  <p>
+    <%= f.label :api_key, t("garden_connection.api_key") %><br>
+    <%= f.password_field :api_key, autocomplete: "off",
+                         required: connection.api_key.blank?,
+                         placeholder: connection.persisted? ? t("garden_connection.key_keep") : nil %>
+  </p>
+  <p class="caption"><%= t("garden_connection.api_key_help_html") %></p>
+
+  <p>
+    <%= f.label :hardiness_zone, t("garden_connection.hardiness_zone") %><br>
+    <%= f.text_field :hardiness_zone, placeholder: GardenConnection::DEFAULT_HARDINESS_ZONE %>
+  </p>
+  <p class="caption"><%= t("garden_connection.hardiness_zone_help") %></p>
+
+  <p>
+    <%= f.label :region, t("garden_connection.region") %><br>
+    <%= f.text_field :region, placeholder: t("garden_connection.region_placeholder") %>
+  </p>
+
+  <p><%= f.submit t("garden_connection.save_button"), class: "btn" %></p>
+<% end %>

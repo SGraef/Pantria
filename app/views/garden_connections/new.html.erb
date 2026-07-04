@@ -1,0 +1,8 @@
+<% content_for :title, t("garden_connection.title") %>
+<h1><%= t("garden_connection.title") %></h1>
+<p class="caption"><%= t("garden_connection.intro") %></p>
+<p><%= link_to t("common.back"), plants_path, class: "btn btn-secondary" %></p>
+
+<div class="card">
+  <%= render "form", connection: @connection, url: garden_connection_path, method: :post %>
+</div>

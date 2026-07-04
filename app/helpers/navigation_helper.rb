@@ -29,7 +29,8 @@ module NavigationHelper
       { key: "home", items: [
         { label: t("nav.todos"),     path: todos_path,     icon: :check },
         { label: t("nav.calendar"),  path: calendar_path,  icon: :calendar },
-        { label: t("nav.documents"), path: documents_path, icon: :file }
+        { label: t("nav.documents"), path: documents_path, icon: :file },
+        { label: t("nav.garden"),    path: plants_path,    icon: :sprout }
       ] }
     ]
   end

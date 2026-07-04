@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2026_06_20_000004) do
+ActiveRecord::Schema[8.0].define(version: 2026_07_04_000002) do
   create_table "active_storage_attachments", charset: "utf8mb4", collation: "utf8mb4_0900_ai_ci", force: :cascade do |t|
     t.string "name", null: false
     t.string "record_type", null: false
@@ -135,6 +135,18 @@ ActiveRecord::Schema[8.0].define(version: 2026_06_20_000004) do
     t.index ["household_id"], name: "index_documents_on_household_id"
     t.index ["paperless_document_id"], name: "index_documents_on_paperless_document_id"
     t.index ["user_id"], name: "index_documents_on_user_id"
+  end
+
+  create_table "garden_connections", charset: "utf8mb4", collation: "utf8mb4_0900_ai_ci", force: :cascade do |t|
+    t.bigint "household_id", null: false
+    t.text "api_key"
+    t.string "hardiness_zone"
+    t.string "region"
+    t.string "last_error", limit: 1000
+    t.datetime "last_synced_at"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["household_id"], name: "index_garden_connections_on_household_id", unique: true
   end
 
   create_table "grocery_items", charset: "utf8mb4", collation: "utf8mb4_0900_ai_ci", force: :cascade do |t|
@@ -357,6 +369,33 @@ ActiveRecord::Schema[8.0].define(version: 2026_06_20_000004) do
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.index ["household_id"], name: "index_paperless_connections_on_household_id", unique: true
+  end
+
+  create_table "plants", charset: "utf8mb4", collation: "utf8mb4_0900_ai_ci", force: :cascade do |t|
+    t.bigint "household_id", null: false
+    t.integer "perenual_id"
+    t.string "common_name", null: false
+    t.string "scientific_name"
+    t.string "crop_key"
+    t.string "cycle"
+    t.string "sunlight"
+    t.string "watering"
+    t.integer "hardiness_min"
+    t.integer "hardiness_max"
+    t.boolean "edible", default: false, null: false
+    t.string "image_url"
+    t.string "external_url"
+    t.integer "sow_from_month"
+    t.integer "sow_to_month"
+    t.integer "harvest_from_month"
+    t.integer "harvest_to_month"
+    t.text "notes"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["household_id", "common_name"], name: "index_plants_on_household_id_and_common_name"
+    t.index ["household_id", "crop_key"], name: "index_plants_on_household_id_and_crop_key"
+    t.index ["household_id", "perenual_id"], name: "index_plants_on_household_id_and_perenual_id"
+    t.index ["household_id"], name: "index_plants_on_household_id"
   end
 
   create_table "prices", charset: "utf8mb4", collation: "utf8mb4_0900_ai_ci", force: :cascade do |t|
@@ -745,6 +784,7 @@ ActiveRecord::Schema[8.0].define(version: 2026_06_20_000004) do
   add_foreign_key "calendar_events", "households"
   add_foreign_key "documents", "households"
   add_foreign_key "documents", "users"
+  add_foreign_key "garden_connections", "households"
   add_foreign_key "grocery_items", "households"
   add_foreign_key "grocery_items", "products"
   add_foreign_key "grocery_items", "stores"
@@ -770,6 +810,7 @@ ActiveRecord::Schema[8.0].define(version: 2026_06_20_000004) do
   add_foreign_key "offers", "products", on_delete: :nullify
   add_foreign_key "offers", "stores", on_delete: :nullify
   add_foreign_key "paperless_connections", "households"
+  add_foreign_key "plants", "households"
   add_foreign_key "prices", "products"
   add_foreign_key "prices", "stores"
   add_foreign_key "product_barcodes", "products"

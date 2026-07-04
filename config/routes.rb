@@ -94,6 +94,15 @@ Rails.application.routes.draw do
     member { post :test }
   end
 
+  # Garden planning: plant catalog (Perenual-backed) + planner.
+  resources :plants, only: %i[index show destroy] do
+    collection { get :search }
+    collection { post :import }
+  end
+
+  # Optional Perenual API binding (admin-only). Singular: one per household.
+  resource :garden_connection, only: %i[new create show update destroy]
+
   resources :todos do
     member do
       post   :transition # one-tap state change
