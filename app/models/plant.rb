@@ -8,6 +8,7 @@
 # Mar-Apr and harvested Jul-Oct.
 class Plant < ApplicationRecord
   belongs_to :household
+  has_many :plantings, dependent: :destroy
 
   validates :common_name, presence: true, length: { maximum: 200 }
   validates :sow_from_month, :sow_to_month, :harvest_from_month, :harvest_to_month,

@@ -103,6 +103,12 @@ Rails.application.routes.draw do
   # Optional Perenual API binding (admin-only). Singular: one per household.
   resource :garden_connection, only: %i[new create show update destroy]
 
+  # Garden beds + the plantings that live in them.
+  resources :garden_beds
+  resources :plantings, only: %i[create update destroy] do
+    member { post :advance }
+  end
+
   resources :todos do
     member do
       post   :transition # one-tap state change

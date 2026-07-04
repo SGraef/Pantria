@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2026_07_04_000002) do
+ActiveRecord::Schema[8.0].define(version: 2026_07_04_000004) do
   create_table "active_storage_attachments", charset: "utf8mb4", collation: "utf8mb4_0900_ai_ci", force: :cascade do |t|
     t.string "name", null: false
     t.string "record_type", null: false
@@ -135,6 +135,18 @@ ActiveRecord::Schema[8.0].define(version: 2026_07_04_000002) do
     t.index ["household_id"], name: "index_documents_on_household_id"
     t.index ["paperless_document_id"], name: "index_documents_on_paperless_document_id"
     t.index ["user_id"], name: "index_documents_on_user_id"
+  end
+
+  create_table "garden_beds", charset: "utf8mb4", collation: "utf8mb4_0900_ai_ci", force: :cascade do |t|
+    t.bigint "household_id", null: false
+    t.string "name", null: false
+    t.string "location"
+    t.string "sun_exposure"
+    t.text "notes"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["household_id", "name"], name: "index_garden_beds_on_household_id_and_name"
+    t.index ["household_id"], name: "index_garden_beds_on_household_id"
   end
 
   create_table "garden_connections", charset: "utf8mb4", collation: "utf8mb4_0900_ai_ci", force: :cascade do |t|
@@ -369,6 +381,25 @@ ActiveRecord::Schema[8.0].define(version: 2026_07_04_000002) do
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.index ["household_id"], name: "index_paperless_connections_on_household_id", unique: true
+  end
+
+  create_table "plantings", charset: "utf8mb4", collation: "utf8mb4_0900_ai_ci", force: :cascade do |t|
+    t.bigint "household_id", null: false
+    t.bigint "garden_bed_id", null: false
+    t.bigint "plant_id", null: false
+    t.integer "quantity", default: 1, null: false
+    t.string "status", default: "planned", null: false
+    t.date "sown_on"
+    t.date "planted_out_on"
+    t.date "expected_harvest_on"
+    t.date "harvested_on"
+    t.text "notes"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["garden_bed_id"], name: "index_plantings_on_garden_bed_id"
+    t.index ["household_id", "status"], name: "index_plantings_on_household_id_and_status"
+    t.index ["household_id"], name: "index_plantings_on_household_id"
+    t.index ["plant_id"], name: "index_plantings_on_plant_id"
   end
 
   create_table "plants", charset: "utf8mb4", collation: "utf8mb4_0900_ai_ci", force: :cascade do |t|
@@ -784,6 +815,7 @@ ActiveRecord::Schema[8.0].define(version: 2026_07_04_000002) do
   add_foreign_key "calendar_events", "households"
   add_foreign_key "documents", "households"
   add_foreign_key "documents", "users"
+  add_foreign_key "garden_beds", "households"
   add_foreign_key "garden_connections", "households"
   add_foreign_key "grocery_items", "households"
   add_foreign_key "grocery_items", "products"
@@ -810,6 +842,9 @@ ActiveRecord::Schema[8.0].define(version: 2026_07_04_000002) do
   add_foreign_key "offers", "products", on_delete: :nullify
   add_foreign_key "offers", "stores", on_delete: :nullify
   add_foreign_key "paperless_connections", "households"
+  add_foreign_key "plantings", "garden_beds"
+  add_foreign_key "plantings", "households"
+  add_foreign_key "plantings", "plants"
   add_foreign_key "plants", "households"
   add_foreign_key "prices", "products"
   add_foreign_key "prices", "stores"

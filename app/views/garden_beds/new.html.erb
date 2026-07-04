@@ -1,0 +1,5 @@
+<% content_for :title, t("garden_bed.new_title") %>
+<h1><%= t("garden_bed.new_title") %></h1>
+<p><%= link_to t("common.back"), garden_beds_path, class: "btn btn-secondary" %></p>
+
+<%= render "form", bed: @bed, url: garden_beds_path, method: :post %>

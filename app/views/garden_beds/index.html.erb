@@ -1,0 +1,23 @@
+<% content_for :title, t("garden_bed.title") %>
+<h1><%= t("garden_bed.title") %></h1>
+
+<p>
+  <%= link_to t("garden_bed.add"), new_garden_bed_path, class: "btn" %>
+  <%= link_to t("garden_bed.catalog_link"), plants_path, class: "btn btn-secondary" %>
+</p>
+<p class="caption"><%= t("garden_bed.intro") %></p>
+
+<% if @garden_beds.any? %>
+  <% @garden_beds.each do |bed| %>
+    <div class="card">
+      <h2><%= link_to bed.name, garden_bed_path(bed) %></h2>
+      <p class="caption">
+        <% if bed.location.present? %><%= bed.location %> · <% end %>
+        <% if bed.sun_exposure.present? %><%= t("garden_bed.sun.#{bed.sun_exposure}") %> · <% end %>
+        <%= t("garden_bed.planting_count", count: bed.active_plantings.count) %>
+      </p>
+    </div>
+  <% end %>
+<% else %>
+  <p><%= t("garden_bed.empty") %></p>
+<% end %>

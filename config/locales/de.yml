@@ -316,6 +316,7 @@ de:
   plant:
     title: "Garten"
     intro: "Deine Pflanzensammlung mit Aussaat- und Erntezeiten sowie Tipps zu guten Nachbarn."
+    planner_link: "Beete & Planung"
     search_title: "Pflanzen suchen"
     search_label: "Pflanze suchen"
     search_placeholder: "z. B. Tomate"
@@ -402,6 +403,55 @@ de:
       strawberry: "Erdbeere"
       chard: "Mangold"
 
+  garden_bed:
+    title: "Beete"
+    intro: "Lege deine Beete an und plane, was wo wächst."
+    add: "Beet anlegen"
+    catalog_link: "Zur Pflanzensammlung"
+    new_title: "Beet anlegen"
+    edit_title: "Beet bearbeiten"
+    save_button: "Speichern"
+    empty: "Noch keine Beete angelegt."
+    planting_count:
+      one: "%{count} Pflanzung"
+      other: "%{count} Pflanzungen"
+    plantings_heading: "Pflanzungen"
+    no_plantings: "In diesem Beet wächst noch nichts."
+    conflicts_heading: "Ungünstige Nachbarn in diesem Beet"
+    conflict_line: "%{plant} steht ungünstig neben %{others}."
+    field:
+      name: "Name"
+      name_placeholder: "z. B. Hochbeet 1"
+      location: "Standort"
+      location_placeholder: "z. B. Südwand"
+      sun_exposure: "Lichtverhältnisse"
+      notes: "Notiz"
+    sun:
+      full_sun: "Sonne"
+      part_shade: "Halbschatten"
+      full_shade: "Schatten"
+
+  planting:
+    add_button: "Hinzufügen"
+    confirm_delete: "Diese Pflanzung wirklich entfernen?"
+    need_plants: "Füge zuerst Pflanzen zu deiner Sammlung hinzu."
+    table:
+      plant: "Pflanze"
+      qty: "Menge"
+      status: "Status"
+    statuses:
+      planned: "Geplant"
+      sown: "Ausgesät"
+      growing: "Wächst"
+      harvested: "Geerntet"
+    advance:
+      to_sown: "Ausgesät"
+      to_growing: "Ausgepflanzt"
+      to_harvested: "Geerntet"
+    field:
+      plant: "Pflanze"
+      plant_prompt: "Pflanze wählen"
+
   notices:
     product_saved:    "Produkt gespeichert."
     product_updated:  "Produkt aktualisiert."
@@ -429,6 +479,12 @@ de:
     grocery_removed:  "Entfernt."
     plant_added:      "Pflanze zur Sammlung hinzugefügt."
     plant_removed:    "Pflanze entfernt."
+    garden_bed_added:   "Beet angelegt."
+    garden_bed_updated: "Beet aktualisiert."
+    garden_bed_removed: "Beet entfernt."
+    planting_added:     "Pflanzung hinzugefügt."
+    planting_updated:   "Pflanzung aktualisiert."
+    planting_removed:   "Pflanzung entfernt."
     household_created:  "Haushalt erstellt."
     household_updated:  "Haushalt aktualisiert."
     cannot_demote_last_admin: "Der letzte verbleibende Admin kann nicht degradiert werden."

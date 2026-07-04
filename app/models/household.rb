@@ -48,6 +48,8 @@ class Household < ApplicationRecord
   has_many :documents, dependent: :destroy
   has_one  :garden_connection, dependent: :destroy
   has_many :plants, dependent: :destroy
+  has_many :garden_beds, dependent: :destroy
+  has_many :plantings, dependent: :destroy
 
   after_create :seed_default_offer_categories
 

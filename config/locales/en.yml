@@ -310,6 +310,7 @@ en:
   plant:
     title: "Garden"
     intro: "Your plant collection with sowing and harvest windows plus companion-planting hints."
+    planner_link: "Beds & planner"
     search_title: "Search plants"
     search_label: "Search for a plant"
     search_placeholder: "e.g. tomato"
@@ -396,6 +397,55 @@ en:
       strawberry: "Strawberry"
       chard: "Chard"
 
+  garden_bed:
+    title: "Beds"
+    intro: "Create your beds and plan what grows where."
+    add: "Add bed"
+    catalog_link: "Go to plant catalog"
+    new_title: "Add bed"
+    edit_title: "Edit bed"
+    save_button: "Save"
+    empty: "No beds yet."
+    planting_count:
+      one: "%{count} planting"
+      other: "%{count} plantings"
+    plantings_heading: "Plantings"
+    no_plantings: "Nothing growing in this bed yet."
+    conflicts_heading: "Poor neighbours in this bed"
+    conflict_line: "%{plant} sits poorly next to %{others}."
+    field:
+      name: "Name"
+      name_placeholder: "e.g. Raised bed 1"
+      location: "Location"
+      location_placeholder: "e.g. south wall"
+      sun_exposure: "Light"
+      notes: "Note"
+    sun:
+      full_sun: "Full sun"
+      part_shade: "Part shade"
+      full_shade: "Full shade"
+
+  planting:
+    add_button: "Add"
+    confirm_delete: "Really remove this planting?"
+    need_plants: "Add plants to your collection first."
+    table:
+      plant: "Plant"
+      qty: "Qty"
+      status: "Status"
+    statuses:
+      planned: "Planned"
+      sown: "Sown"
+      growing: "Growing"
+      harvested: "Harvested"
+    advance:
+      to_sown: "Sown"
+      to_growing: "Planted out"
+      to_harvested: "Harvested"
+    field:
+      plant: "Plant"
+      plant_prompt: "Choose a plant"
+
   notices:
     product_saved:    "Product saved."
     product_updated:  "Product updated."
@@ -423,6 +473,12 @@ en:
     grocery_removed:  "Removed."
     plant_added:      "Plant added to your collection."
     plant_removed:    "Plant removed."
+    garden_bed_added:   "Bed created."
+    garden_bed_updated: "Bed updated."
+    garden_bed_removed: "Bed removed."
+    planting_added:     "Planting added."
+    planting_updated:   "Planting updated."
+    planting_removed:   "Planting removed."
     household_created:  "Household created."
     household_updated:  "Household updated."
     cannot_demote_last_admin: "Can't demote the only remaining admin."
