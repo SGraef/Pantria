@@ -104,10 +104,16 @@ Rails.application.routes.draw do
   resource :garden_connection, only: %i[new create show update destroy]
 
   # Garden beds + the plantings that live in them.
-  resources :garden_beds
+  resources :garden_beds do
+    member { patch :geometry } # JSON save from the map / lite planner
+  end
   resources :plantings, only: %i[create update destroy] do
     member { post :advance }
   end
+
+  # Visual garden overview (Leaflet over official WMS layers, or the lite
+  # planner). Singular: one map per household; update = admin settings form.
+  resource :garden_map, only: %i[show update]
 
   resources :todos do
     member do

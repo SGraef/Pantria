@@ -29,6 +29,24 @@ module GardenHelper
     end
   end
 
+  # Bed payload for the garden map / lite planner Stimulus controllers.
+  # Uses the preloaded plantings (no per-bed queries) and ships each bed's
+  # save URL so the JS never templates routes.
+  # @param beds [Enumerable<GardenBed>] with plantings+plants preloaded
+  # @return [Array<Hash>]
+  def garden_map_beds_json(beds)
+    beds.map do |bed|
+      active = bed.plantings.reject { |p| p.status == "harvested" }
+      { id: bed.id, name: bed.name,
+        url: garden_bed_path(bed), geometryUrl: geometry_garden_bed_path(bed),
+        boundary: bed.boundary,
+        widthM: bed.width_m&.to_f, lengthM: bed.length_m&.to_f,
+        posXM: bed.pos_x_m&.to_f, posYM: bed.pos_y_m&.to_f,
+        areaSqm: bed.area_sqm&.to_f,
+        plantings: active.map { |p| p.plant.name } }
+    end
+  end
+
   # Bad-neighbour conflicts within a bed: for each active planting, the other
   # crop keys present that its companion table warns against.
   # @param plantings [Enumerable<Planting>]

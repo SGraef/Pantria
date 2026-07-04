@@ -27,6 +27,8 @@
       })();
     </script>
     <%= stylesheet_link_tag "application", "data-turbo-track": "reload" %>
+    <%# Per-page extras (e.g. the garden map's leaflet.css). %>
+    <%= yield :head %>
     <%= javascript_importmap_tags %>
     <%# Register the service worker. Guarded so it only runs in browsers
         that support SWs (and skips when serving plain HTTP from

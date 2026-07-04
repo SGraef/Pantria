@@ -1,0 +1,120 @@
+<% content_for :title, t("garden_map.title") %>
+<% content_for :head, stylesheet_link_tag("leaflet") if @settings.map_mode? %>
+<h1><%= t("garden_map.title") %></h1>
+
+<p>
+  <%= link_to t("garden_map.beds_link"), garden_beds_path, class: "btn btn-secondary" %>
+  <%= link_to t("garden_bed.catalog_link"), plants_path, class: "btn btn-secondary" %>
+</p>
+<p class="caption"><%= t("garden_map.intro_#{@settings.mode}") %></p>
+
+<% if @garden_beds.empty? %>
+  <p><%= t("garden_map.no_beds_html", link: link_to(t("garden_bed.add"), new_garden_bed_path)) %></p>
+<% end %>
+
+<% if @settings.map_mode? %>
+  <div class="card card-flat garden-map-wrap"
+       data-controller="garden-map"
+       data-garden-map-config-value="<%= Garden::MapSources.client_config(@settings).to_json %>"
+       data-garden-map-center-value="<%= @settings.effective_center.to_json %>"
+       data-garden-map-zoom-value="<%= @settings.effective_zoom %>"
+       data-garden-map-beds-value="<%= garden_map_beds_json(@garden_beds).to_json %>"
+       data-garden-map-token-value="<%= form_authenticity_token %>"
+       data-garden-map-focus-bed-id-value="<%= params[:bed].to_i %>"
+       data-i18n-draw-hint="<%= t("garden_map.draw.hint") %>"
+       data-i18n-draw-need-points="<%= t("garden_map.draw.need_points") %>"
+       data-i18n-save-failed="<%= t("garden_map.save_failed") %>"
+       data-i18n-area-label="<%= t("garden_map.area_label") %>">
+    <div class="garden-map-toolbar">
+      <label><input type="checkbox" data-garden-map-target="dopToggle"
+                    data-action="garden-map#toggleDop"> <%= t("garden_map.layers.dop") %></label>
+      <label><input type="checkbox" data-garden-map-target="alkisToggle"
+                    data-action="garden-map#toggleAlkis"> <%= t("garden_map.layers.alkis") %></label>
+      <span class="caption" data-garden-map-target="readout"></span>
+    </div>
+    <div class="garden-map" data-garden-map-target="map"></div>
+
+    <% if @garden_beds.any? %>
+      <h2 class="garden-map-beds-heading"><%= t("garden_map.beds_heading") %></h2>
+      <ul class="garden-map-bedlist">
+        <% @garden_beds.each do |bed| %>
+          <li data-bed-id="<%= bed.id %>">
+            <span class="garden-map-bed-swatch" data-garden-map-target="swatch" data-bed-id="<%= bed.id %>"></span>
+            <%= link_to bed.name, garden_bed_path(bed) %>
+            <span class="caption" data-garden-map-target="bedArea" data-bed-id="<%= bed.id %>">
+              <%= t("garden_map.area_label", area: number_with_precision(bed.area_sqm, precision: 1)) if bed.area_sqm %>
+            </span>
+            <span class="garden-map-bed-actions">
+              <button type="button" class="btn btn-sm btn-secondary"
+                      data-action="garden-map#startDraw" data-bed-id="<%= bed.id %>">
+                <%= bed.mapped? ? t("garden_map.draw.redraw") : t("garden_map.draw.start") %>
+              </button>
+              <% if bed.mapped? %>
+                <button type="button" class="btn btn-sm btn-secondary"
+                        data-action="garden-map#clearBoundary" data-bed-id="<%= bed.id %>">
+                  <%= t("garden_map.draw.clear") %>
+                </button>
+              <% end %>
+            </span>
+          </li>
+        <% end %>
+      </ul>
+      <p class="caption" data-garden-map-target="drawControls" hidden>
+        <button type="button" class="btn btn-sm" data-action="garden-map#finishDraw"><%= t("garden_map.draw.finish") %></button>
+        <button type="button" class="btn btn-sm btn-secondary" data-action="garden-map#cancelDraw"><%= t("garden_map.draw.cancel") %></button>
+      </p>
+    <% end %>
+
+    <% if policy(@settings).update? %>
+      <%= render "settings_form", settings: @settings %>
+    <% end %>
+  </div>
+  <p class="caption"><%= t("garden_map.attribution_note") %></p>
+<% else %>
+  <div class="card card-flat"
+       data-controller="garden-lite"
+       data-garden-lite-beds-value="<%= garden_map_beds_json(@garden_beds).to_json %>"
+       data-garden-lite-token-value="<%= form_authenticity_token %>"
+       data-i18n-save-failed="<%= t("garden_map.save_failed") %>"
+       data-i18n-area-label="<%= t("garden_map.area_label") %>">
+    <p class="caption"><%= t("garden_map.lite.position_hint") %></p>
+    <div class="garden-lite-canvas">
+      <svg data-garden-lite-target="svg" class="garden-lite-svg" xmlns="http://www.w3.org/2000/svg"></svg>
+    </div>
+    <p class="caption"><%= t("garden_map.lite.scale_legend") %></p>
+
+    <% if @garden_beds.any? %>
+      <h2 class="garden-map-beds-heading"><%= t("garden_map.beds_heading") %></h2>
+      <table>
+        <thead>
+          <tr>
+            <th><%= t("garden_bed.field.name") %></th>
+            <th><%= t("garden_map.lite.width") %></th>
+            <th><%= t("garden_map.lite.length") %></th>
+            <th><%= t("garden_bed.field.area") %></th>
+          </tr>
+        </thead>
+        <tbody>
+          <% @garden_beds.each do |bed| %>
+            <tr data-bed-id="<%= bed.id %>">
+              <td><%= link_to bed.name, garden_bed_path(bed) %></td>
+              <td><input type="number" min="0.1" max="1000" step="0.1" inputmode="decimal"
+                         value="<%= bed.width_m&.to_f %>" data-garden-lite-target="width"
+                         data-bed-id="<%= bed.id %>" data-action="change->garden-lite#dimensionChanged"></td>
+              <td><input type="number" min="0.1" max="1000" step="0.1" inputmode="decimal"
+                         value="<%= bed.length_m&.to_f %>" data-garden-lite-target="length"
+                         data-bed-id="<%= bed.id %>" data-action="change->garden-lite#dimensionChanged"></td>
+              <td data-garden-lite-target="bedArea" data-bed-id="<%= bed.id %>">
+                <%= t("garden_map.area_label", area: number_with_precision(bed.area_sqm, precision: 1)) if bed.area_sqm %>
+              </td>
+            </tr>
+          <% end %>
+        </tbody>
+      </table>
+    <% end %>
+
+    <% if policy(@settings).update? %>
+      <%= render "settings_form", settings: @settings %>
+    <% end %>
+  </div>
+<% end %>

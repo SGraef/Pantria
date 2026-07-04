@@ -48,6 +48,50 @@ RSpec.describe "GardenBeds" do
     end
   end
 
+  describe "PATCH /garden_beds/:id/geometry" do
+    let(:bed) { create(:garden_bed, household: household) }
+    # Roughly 10 m x 10 m right triangle near Hannover => ~50 m2.
+    let(:ring) do
+      step = 10.0 / Garden::Geometry::EARTH_RADIUS_M * 180 / Math::PI
+      [{ lat: 52.0, lng: 9.0 },
+       { lat: 52.0, lng: 9.0 + (step / Math.cos(52 * Math::PI / 180)) },
+       { lat: 52.0 + step, lng: 9.0 }]
+    end
+
+    it "saves a traced boundary and returns the server-computed measurements" do
+      patch geometry_garden_bed_path(bed), params: { garden_bed: { boundary: ring } }, as: :json
+      expect(response).to have_http_status(:ok)
+      body = response.parsed_body
+      expect(body["area_sqm"]).to be_within(1).of(50.0)
+      expect(body["edges_m"].length).to eq(3)
+      expect(bed.reload.boundary.length).to eq(3)
+    end
+
+    it "clears the boundary with an empty array" do
+      bed.update!(boundary: ring.map { |p| p.transform_keys(&:to_s) })
+      patch geometry_garden_bed_path(bed), params: { garden_bed: { boundary: [] } }, as: :json
+      expect(response).to have_http_status(:ok)
+      expect(bed.reload.boundary).to be_nil
+      expect(bed.area_sqm).to be_nil
+    end
+
+    it "saves lite-planner dimensions and position" do
+      patch geometry_garden_bed_path(bed),
+            params: { garden_bed: { width_m: 3.0, length_m: 1.2, pos_x_m: 2.5, pos_y_m: 0 } }, as: :json
+      expect(response).to have_http_status(:ok)
+      expect(response.parsed_body["area_sqm"]).to eq(3.6)
+      expect(bed.reload.pos_x_m).to eq(2.5)
+    end
+
+    it "rejects an invalid boundary" do
+      patch geometry_garden_bed_path(bed),
+            params: { garden_bed: { boundary: [{ lat: 999, lng: 9 }, { lat: 52, lng: 9 }, { lat: 52, lng: 10 }] } },
+            as:     :json
+      expect(response).to have_http_status(:unprocessable_content)
+      expect(bed.reload.boundary).to be_nil
+    end
+  end
+
   describe "DELETE /garden_beds/:id" do
     it "removes the bed and its plantings" do
       bed = create(:garden_bed, household: household)
