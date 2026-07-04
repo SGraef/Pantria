@@ -10,11 +10,12 @@ RSpec.describe "GardenBeds" do
   before { login_via_post(user) }
 
   describe "GET /garden_beds" do
-    it "lists beds with their active planting count" do
-      create(:garden_bed, household: household, name: "Raised bed A")
+    it "lists beds with their active planting count and area" do
+      create(:garden_bed, household: household, name: "Raised bed A", width_m: 3, length_m: 1.2)
       get garden_beds_path
       expect(response).to have_http_status(:ok)
       expect(response.body).to include("Raised bed A")
+      expect(response.body).to include("m²") # 3.6 m2 from width * length
     end
   end
 

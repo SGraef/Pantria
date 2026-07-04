@@ -3,6 +3,7 @@
 
 <p>
   <%= link_to t("garden_bed.add"), new_garden_bed_path, class: "btn" %>
+  <%= link_to t("nav.garden_map"), garden_map_path, class: "btn btn-secondary" %>
   <%= link_to t("garden_bed.catalog_link"), plants_path, class: "btn btn-secondary" %>
 </p>
 <p class="caption"><%= t("garden_bed.intro") %></p>
@@ -14,6 +15,7 @@
       <p class="caption">
         <% if bed.location.present? %><%= bed.location %> · <% end %>
         <% if bed.sun_exposure.present? %><%= t("garden_bed.sun.#{bed.sun_exposure}") %> · <% end %>
+        <% if bed.area_sqm.present? %><%= t("garden_map.area_label", area: number_with_precision(bed.area_sqm, precision: 1)) %> · <% end %>
         <%= t("garden_bed.planting_count", count: bed.active_plantings.count) %>
       </p>
     </div>

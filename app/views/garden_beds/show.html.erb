@@ -2,12 +2,14 @@
 <h1><%= @bed.name %></h1>
 <p class="caption">
   <% if @bed.location.present? %><%= @bed.location %> · <% end %>
-  <% if @bed.sun_exposure.present? %><%= t("garden_bed.sun.#{@bed.sun_exposure}") %><% end %>
+  <% if @bed.sun_exposure.present? %><%= t("garden_bed.sun.#{@bed.sun_exposure}") %> · <% end %>
+  <% if @bed.area_sqm.present? %><%= t("garden_map.area_label", area: number_with_precision(@bed.area_sqm, precision: 1)) %><% end %>
 </p>
 
 <p>
   <%= link_to t("common.back"), garden_beds_path, class: "btn btn-secondary" %>
   <%= link_to t("common.edit"), edit_garden_bed_path(@bed), class: "btn btn-secondary" %>
+  <%= link_to t("garden_bed.map_link"), garden_map_path(bed: @bed.id), class: "btn btn-secondary" %>
 </p>
 
 <% if @bed.notes.present? %><div class="card"><%= simple_format(@bed.notes) %></div><% end %>
