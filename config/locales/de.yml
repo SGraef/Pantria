@@ -181,6 +181,11 @@ de:
     offer_match:
       title: "Beobachteter Artikel im Angebot"
       body: "%{title} — %{price} bei %{retailer}"
+    garden_reminder:
+      sow_title: "Zeit zum Aussäen: %{plant}"
+      sow_body: "%{plant} kann jetzt in „%{bed}“ ausgesät werden."
+      harvest_title: "Erntezeit: %{plant}"
+      harvest_body: "%{plant} in „%{bed}“ ist erntereif."
 
   notification_preference:
     title: "Benachrichtigungen"
@@ -198,6 +203,7 @@ de:
       storage_expiring: "Lebensmittel läuft bald ab"
       storage_expired: "Gerade abgelaufene Lebensmittel"
       offer_match: "Beobachtete Artikel im Angebot"
+      garden_reminder: "Aussaat- und Erntezeiten"
 
   push:
     enable: "Push-Benachrichtigungen aktivieren"

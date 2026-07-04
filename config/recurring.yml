@@ -40,6 +40,15 @@ default: &default
     queue: default
     description: "Notify members about storage items expiring soon or just expired."
 
+  scan_garden_reminders:
+    class: ScanGardenRemindersJob
+    # Once a day in the morning: nudges members to sow or harvest plantings whose
+    # curated window is open this month. Deduped per planting/month, so the daily
+    # cadence alerts once a month per planting.
+    schedule: every day at 8am
+    queue: default
+    description: "Notify members when a planting is due to be sown or harvested."
+
 development:
   <<: *default
 

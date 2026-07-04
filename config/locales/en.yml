@@ -175,6 +175,11 @@ en:
     offer_match:
       title: "Watched item on offer"
       body: "%{title} — %{price} at %{retailer}"
+    garden_reminder:
+      sow_title: "Time to sow: %{plant}"
+      sow_body: "%{plant} can be sown in “%{bed}” now."
+      harvest_title: "Harvest time: %{plant}"
+      harvest_body: "%{plant} in “%{bed}” is ready to harvest."
 
   notification_preference:
     title: "Notification settings"
@@ -192,6 +197,7 @@ en:
       storage_expiring: "Food expiring soon"
       storage_expired: "Food that just expired"
       offer_match: "Watched items on offer"
+      garden_reminder: "Sowing and harvest reminders"
 
   push:
     enable: "Enable push notifications"
