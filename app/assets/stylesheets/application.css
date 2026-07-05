@@ -769,3 +769,14 @@ pre {
   pointer-events: none;
 }
 .garden-lite-svg .grid line { stroke: var(--border-subtle); stroke-width: 0.02; }
+
+/* ---- Projects: shared color palette chips -------------------- */
+/* Named palette for user-managed labels (project statuses/categories,
+   ColorPalette::COLORS). Built on the theme's soft variable pairs so both
+   themes stay legible; also used as column dots on the kanban board. */
+.chip-color-clay       { background: var(--accent-soft);    color: var(--accent-soft-text); }
+.chip-color-olive      { background: var(--secondary-soft); color: var(--secondary-soft-text); }
+.chip-color-moss       { background: var(--success-soft);   color: var(--success); }
+.chip-color-sand       { background: var(--warning-soft);   color: var(--warning); }
+.chip-color-terracotta { background: var(--danger-soft);    color: var(--danger); }
+.chip-color-sky        { background: var(--info-soft);      color: var(--info); }

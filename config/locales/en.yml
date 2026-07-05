@@ -31,6 +31,14 @@ en:
 
   common:
     save: "Save"
+    colors:
+      none: "No color"
+      clay: "Clay"
+      olive: "Olive"
+      moss: "Moss"
+      sand: "Sand"
+      terracotta: "Terracotta"
+      sky: "Sky"
     cancel: "Cancel"
     close: "Close"
     delete: "Delete"
@@ -487,6 +495,47 @@ en:
       custom_alkis_url: "Parcel WMS URL"
       custom_alkis_layer: "Parcel WMS layer"
       save: "Save settings"
+
+  project:
+    statuses:
+      title: "Project statuses"
+      intro: "Statuses are the columns of the project board, ordered by position (lower = further left). \"Counts as done\" statuses complete a project — they release anything it was blocking."
+      back: "To the projects"
+      add: "Add status"
+      create_button: "Add"
+      label_name: "Name"
+      name_placeholder: "e.g. Waiting for parts"
+      label_position: "Position"
+      label_color: "Color"
+      label_done: "Counts as done"
+      done_help: "Projects in this status count as completed and no longer block other projects."
+      remove: "Remove status"
+      remove_confirm: "Remove the status \"%{name}\"?"
+      reset_defaults: "Reset to defaults"
+      reset_confirm: "Replace all statuses with the defaults?"
+      flash:
+        created: "Status \"%{name}\" added."
+        updated: "Status \"%{name}\" updated."
+        removed: "Status \"%{name}\" removed."
+        in_use: "\"%{name}\" still has projects — move them first."
+        last_status: "At least one status must remain."
+        reset_blocked: "Reset is only possible while no projects exist."
+        reset_done: "%{count} default statuses restored."
+    categories:
+      title: "Project categories"
+      intro: "Categories group projects on the board — each shows as a colored chip on its card."
+      add: "Add category"
+      create_button: "Add"
+      label_name: "Name"
+      name_placeholder: "e.g. Renovation"
+      label_position: "Position"
+      label_color: "Color"
+      remove: "Remove category"
+      remove_confirm: "Remove the category \"%{name}\"? Its projects keep running uncategorized."
+      flash:
+        created: "Category \"%{name}\" added."
+        updated: "Category \"%{name}\" updated."
+        removed: "Category \"%{name}\" removed."
 
   planting:
     add_button: "Add"

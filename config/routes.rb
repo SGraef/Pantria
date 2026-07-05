@@ -120,6 +120,19 @@ Rails.application.routes.draw do
     get  :parcel
   end
 
+  # Project planning: user-defined statuses (= kanban columns) and
+  # categories, then the projects themselves. The settings routes use
+  # path "projects/..." and MUST stay above `resources :projects`, or
+  # GET /projects/statuses would match projects#show with id "statuses".
+  resources :project_statuses, only: %i[index create update destroy], path: "projects/statuses" do
+    post :reset_defaults, on: :collection
+  end
+  resources :project_categories, only: %i[index create update destroy], path: "projects/categories"
+  resources :projects do
+    member { patch :move } # kanban drag + no-JS fallback
+    resources :relations, only: %i[create destroy], controller: "project_relations"
+  end
+
   resources :todos do
     member do
       post   :transition # one-tap state change

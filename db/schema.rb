@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2026_07_05_000001) do
+ActiveRecord::Schema[8.0].define(version: 2026_07_06_000004) do
   create_table "active_storage_attachments", charset: "utf8mb4", collation: "utf8mb4_0900_ai_ci", force: :cascade do |t|
     t.string "name", null: false
     t.string "record_type", null: false
@@ -505,6 +505,65 @@ ActiveRecord::Schema[8.0].define(version: 2026_07_05_000001) do
     t.index ["household_id"], name: "index_products_on_household_id"
   end
 
+  create_table "project_categories", charset: "utf8mb4", collation: "utf8mb4_unicode_ci", force: :cascade do |t|
+    t.bigint "household_id", null: false
+    t.string "name", null: false
+    t.integer "position", default: 0, null: false
+    t.string "color"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["household_id", "name"], name: "index_project_categories_on_household_id_and_name", unique: true
+    t.index ["household_id", "position"], name: "index_project_categories_on_household_id_and_position"
+    t.index ["household_id"], name: "index_project_categories_on_household_id"
+  end
+
+  create_table "project_relations", charset: "utf8mb4", collation: "utf8mb4_unicode_ci", force: :cascade do |t|
+    t.bigint "household_id", null: false
+    t.bigint "project_id", null: false
+    t.bigint "related_project_id", null: false
+    t.string "kind", null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["household_id"], name: "index_project_relations_on_household_id"
+    t.index ["project_id", "related_project_id", "kind"], name: "index_project_relations_uniqueness", unique: true
+    t.index ["project_id"], name: "index_project_relations_on_project_id"
+    t.index ["related_project_id"], name: "index_project_relations_on_related_project_id"
+  end
+
+  create_table "project_statuses", charset: "utf8mb4", collation: "utf8mb4_unicode_ci", force: :cascade do |t|
+    t.bigint "household_id", null: false
+    t.string "name", null: false
+    t.integer "position", default: 0, null: false
+    t.string "color"
+    t.boolean "done", default: false, null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["household_id", "name"], name: "index_project_statuses_on_household_id_and_name", unique: true
+    t.index ["household_id", "position"], name: "index_project_statuses_on_household_id_and_position"
+    t.index ["household_id"], name: "index_project_statuses_on_household_id"
+  end
+
+  create_table "projects", charset: "utf8mb4", collation: "utf8mb4_unicode_ci", force: :cascade do |t|
+    t.bigint "household_id", null: false
+    t.string "name", null: false
+    t.text "description"
+    t.bigint "project_status_id", null: false
+    t.bigint "project_category_id"
+    t.bigint "parent_id"
+    t.integer "budget_cents"
+    t.string "currency", limit: 3, default: "EUR", null: false
+    t.integer "position", default: 0, null: false
+    t.bigint "creator_id"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["creator_id"], name: "index_projects_on_creator_id"
+    t.index ["household_id", "project_status_id", "position"], name: "index_projects_on_board_order"
+    t.index ["household_id"], name: "index_projects_on_household_id"
+    t.index ["parent_id"], name: "index_projects_on_parent_id"
+    t.index ["project_category_id"], name: "index_projects_on_project_category_id"
+    t.index ["project_status_id"], name: "index_projects_on_project_status_id"
+  end
+
   create_table "push_subscriptions", charset: "utf8mb4", collation: "utf8mb4_0900_ai_ci", force: :cascade do |t|
     t.bigint "user_id", null: false
     t.bigint "household_id", null: false
@@ -875,6 +934,16 @@ ActiveRecord::Schema[8.0].define(version: 2026_07_05_000001) do
   add_foreign_key "product_barcodes", "products"
   add_foreign_key "product_synonyms", "products"
   add_foreign_key "products", "households"
+  add_foreign_key "project_categories", "households"
+  add_foreign_key "project_relations", "households"
+  add_foreign_key "project_relations", "projects"
+  add_foreign_key "project_relations", "projects", column: "related_project_id"
+  add_foreign_key "project_statuses", "households"
+  add_foreign_key "projects", "households"
+  add_foreign_key "projects", "project_categories"
+  add_foreign_key "projects", "project_statuses"
+  add_foreign_key "projects", "projects", column: "parent_id"
+  add_foreign_key "projects", "users", column: "creator_id"
   add_foreign_key "push_subscriptions", "households"
   add_foreign_key "push_subscriptions", "users"
   add_foreign_key "receipt_line_items", "products"

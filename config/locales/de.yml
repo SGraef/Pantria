@@ -37,6 +37,14 @@ de:
 
   common:
     save: "Speichern"
+    colors:
+      none: "Keine Farbe"
+      clay: "Ton"
+      olive: "Olive"
+      moss: "Moos"
+      sand: "Sand"
+      terracotta: "Terrakotta"
+      sky: "Himmelblau"
     cancel: "Abbrechen"
     close: "Schließen"
     delete: "Löschen"
@@ -493,6 +501,47 @@ de:
       custom_alkis_url: "Flurstück-WMS-URL"
       custom_alkis_layer: "Flurstück-WMS-Layer"
       save: "Einstellungen speichern"
+
+  project:
+    statuses:
+      title: "Projektstatus"
+      intro: "Status sind die Spalten des Projektboards, sortiert nach Position (kleiner = weiter links). Status mit „zählt als erledigt“ schließen ein Projekt ab — es blockiert dann nichts mehr."
+      back: "Zu den Projekten"
+      add: "Status anlegen"
+      create_button: "Anlegen"
+      label_name: "Name"
+      name_placeholder: "z. B. Wartet auf Teile"
+      label_position: "Position"
+      label_color: "Farbe"
+      label_done: "Zählt als erledigt"
+      done_help: "Projekte in diesem Status gelten als abgeschlossen und blockieren andere Projekte nicht mehr."
+      remove: "Status entfernen"
+      remove_confirm: "Status „%{name}“ entfernen?"
+      reset_defaults: "Auf Standard zurücksetzen"
+      reset_confirm: "Alle Status durch die Standardwerte ersetzen?"
+      flash:
+        created: "Status „%{name}“ angelegt."
+        updated: "Status „%{name}“ aktualisiert."
+        removed: "Status „%{name}“ entfernt."
+        in_use: "„%{name}“ enthält noch Projekte — bitte zuerst verschieben."
+        last_status: "Mindestens ein Status muss bestehen bleiben."
+        reset_blocked: "Zurücksetzen geht nur, solange keine Projekte existieren."
+        reset_done: "%{count} Standard-Status wiederhergestellt."
+    categories:
+      title: "Projektkategorien"
+      intro: "Kategorien gruppieren Projekte auf dem Board — jede erscheint als farbiger Chip auf der Karte."
+      add: "Kategorie anlegen"
+      create_button: "Anlegen"
+      label_name: "Name"
+      name_placeholder: "z. B. Renovierung"
+      label_position: "Position"
+      label_color: "Farbe"
+      remove: "Kategorie entfernen"
+      remove_confirm: "Kategorie „%{name}“ entfernen? Ihre Projekte laufen ohne Kategorie weiter."
+      flash:
+        created: "Kategorie „%{name}“ angelegt."
+        updated: "Kategorie „%{name}“ aktualisiert."
+        removed: "Kategorie „%{name}“ entfernt."
 
   planting:
     add_button: "Hinzufügen"

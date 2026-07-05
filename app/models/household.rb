@@ -51,10 +51,17 @@ class Household < ApplicationRecord
   has_many :plants, dependent: :destroy
   has_many :garden_beds, dependent: :destroy
   has_many :plantings, dependent: :destroy
+  # Projects before statuses/categories: destroying the household must
+  # remove projects first or the statuses' destroy trips the NOT NULL FK.
+  has_many :projects, dependent: :destroy
+  has_many :project_statuses, -> { ordered }, dependent: :destroy
+  has_many :project_categories, -> { ordered }, dependent: :destroy
 
   after_create :seed_default_offer_categories
 
   after_create :seed_default_locations
+
+  after_create :seed_default_project_statuses
 
   validates :name, presence: true, length: { maximum: 80 }
   validates :timezone, presence: true
@@ -129,5 +136,11 @@ class Household < ApplicationRecord
         loc.position = i
       end
     end
+  end
+
+  def seed_default_project_statuses
+    ProjectStatusSeeder.call(self)
+  rescue StandardError => e
+    Rails.logger.warn("[Household] project-status seed failed: #{e.class}: #{e.message}")
   end
 end
