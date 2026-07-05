@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2026_07_06_000008) do
+ActiveRecord::Schema[8.0].define(version: 2026_07_06_100002) do
   create_table "active_storage_attachments", charset: "utf8mb4", collation: "utf8mb4_0900_ai_ci", force: :cascade do |t|
     t.string "name", null: false
     t.string "record_type", null: false
@@ -145,7 +145,6 @@ ActiveRecord::Schema[8.0].define(version: 2026_07_06_000008) do
     t.text "notes"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
-    t.json "boundary"
     t.decimal "width_m", precision: 6, scale: 2
     t.decimal "length_m", precision: 6, scale: 2
     t.decimal "pos_x_m", precision: 7, scale: 2
@@ -181,6 +180,8 @@ ActiveRecord::Schema[8.0].define(version: 2026_07_06_000008) do
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.string "address", limit: 200
+    t.json "property_boundary"
+    t.decimal "property_area_sqm", precision: 10, scale: 2
     t.index ["household_id"], name: "index_garden_map_settings_on_household_id", unique: true
   end
 

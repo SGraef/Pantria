@@ -445,7 +445,7 @@ de:
       sun_exposure: "Lichtverhältnisse"
       notes: "Notiz"
       area: "Fläche"
-    map_link: "Auf der Gartenkarte zeigen"
+    map_link: "Zum Gartenplaner"
     sun:
       full_sun: "Sonne"
       part_shade: "Halbschatten"
@@ -453,8 +453,7 @@ de:
 
   garden_map:
     title: "Gartenkarte"
-    intro_map: "Zeichne deine Beete auf dem amtlichen Luftbild ein — Größen und Maße kommen aus den vermessenen Kartendaten."
-    intro_lite: "Plane deine Beete maßstabsgetreu: Breite und Länge eintragen, dann per Ziehen anordnen."
+    intro: "Erfasse dein Grundstück auf der amtlichen Karte und plane die Beete dann maßstabsgetreu innerhalb des Umrisses."
     beds_link: "Zu den Beeten"
     beds_heading: "Beete"
     no_beds_html: "Noch keine Beete — lege zuerst eins an: %{link}."
@@ -465,13 +464,19 @@ de:
       dop: "Luftbild"
       alkis: "Flurstücke (ALKIS)"
     draw:
-      start: "Einzeichnen"
-      redraw: "Neu zeichnen"
       finish: "Fertig"
       cancel: "Abbrechen"
-      clear: "Umriss entfernen"
       hint: "Klicke auf die Karte, um Eckpunkte zu setzen, dann auf Fertig."
       need_points: "Mindestens 3 Punkte setzen."
+    property:
+      heading: "Grundstück"
+      hint: "Zeichne dein Grundstück auf dem Luftbild nach — oder klicke auf „Flurstück anzeigen“ und übernimm den amtlichen Umriss."
+      draw: "Grundstück einzeichnen"
+      redraw: "Grundstück neu zeichnen"
+      clear: "Umriss entfernen"
+      area: "Grundstück: %{area} m²"
+    planner:
+      heading: "Gartenplaner"
     locate:
       label: "Adresse"
       placeholder: "Straße, Hausnummer, Ort"
@@ -484,6 +489,7 @@ de:
       hint: "Klicke dein Grundstück auf der Karte an, um Umriss und amtliche Fläche abzurufen."
       official_area: "amtliche Fläche %{area} m²"
       not_found: "An diesem Punkt wurde kein Flurstück gefunden."
+      adopt: "Als Grundstück übernehmen"
     lite:
       width: "Breite (m)"
       length: "Länge (m)"

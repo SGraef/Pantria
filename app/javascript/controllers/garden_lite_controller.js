@@ -1,22 +1,31 @@
 import { Controller } from "@hotwired/stimulus"
 
-// Lite garden planner for households without an open WMS: beds are to-scale
-// rectangles (width_m x length_m, from the inputs in the table below the
-// canvas) on a plain SVG with a 1 m grid. Dragging a bed PATCHes its
-// position through the same per-bed geometry endpoint the map uses.
+// The to-scale garden planner: beds are rectangles (width_m x length_m, from
+// the inputs in the table below the canvas) on an SVG with a 1 m grid.
+// When the Grundstück has been captured on the garden map, its outline is
+// projected to local meters and drawn as the backdrop, so beds are arranged
+// inside the real property shape. Dragging a bed PATCHes its position
+// through the same per-bed geometry endpoint the dimension inputs use.
 //
 // The SVG viewBox is in meters (1 unit = 1 m), so all sizes/positions are
 // real-world values and scaling is just viewport math.
+const EARTH_RADIUS_M = 6378137.0
 const MARGIN_M = 1
 const MIN_CANVAS_M = 10
 const SNAP_M = 0.1
 
 export default class extends Controller {
-  static values = { beds: Array, token: String }
+  static values = {
+    beds: Array,
+    property: Array, // Grundstück ring [{lat, lng}, ...]; may be empty
+    token: String
+  }
+
   static targets = ["svg", "width", "length", "bedArea"]
 
   connect() {
     this.beds = new Map(this.bedsValue.map((bed) => [bed.id, { ...bed }]))
+    this.propertyMeters = projectToMeters(this.propertyValue)
     this.dragging = null
     this.render()
   }
@@ -33,7 +42,7 @@ export default class extends Controller {
         x: Math.max(max.x, (bed.posXM || 0) + bed.widthM),
         y: Math.max(max.y, (bed.posYM || 0) + bed.lengthM)
       }),
-      { x: MIN_CANVAS_M, y: MIN_CANVAS_M / 2 }
+      this.propertyExtent() || { x: MIN_CANVAS_M, y: MIN_CANVAS_M / 2 }
     )
     const w = extent.x + MARGIN_M * 2
     const h = extent.y + MARGIN_M * 2
@@ -41,7 +50,16 @@ export default class extends Controller {
     svg.style.aspectRatio = `${w} / ${h}`
 
     this.drawGrid(svg, w, h)
+    this.drawProperty(svg)
     sized.forEach((bed) => this.drawBed(svg, bed))
+  }
+
+  propertyExtent() {
+    if (!this.propertyMeters) return null
+    return {
+      x: Math.max(...this.propertyMeters.map(([x]) => x)),
+      y: Math.max(...this.propertyMeters.map(([, y]) => y))
+    }
   }
 
   sizedBeds() {
@@ -57,6 +75,14 @@ export default class extends Controller {
       grid.appendChild(this.el("line", { x1: -MARGIN_M, y1: y, x2: w - MARGIN_M, y2: y }))
     }
     svg.appendChild(grid)
+  }
+
+  drawProperty(svg) {
+    if (!this.propertyMeters) return
+    const d = `${this.propertyMeters
+      .map(([x, y], i) => `${i === 0 ? "M" : "L"}${x.toFixed(2)} ${y.toFixed(2)}`)
+      .join(" ")} Z`
+    svg.appendChild(this.el("path", { class: "property", d }))
   }
 
   drawBed(svg, bed) {
@@ -179,4 +205,20 @@ export default class extends Controller {
 
 function snap(meters) {
   return Math.round(meters / SNAP_M) * SNAP_M
+}
+
+// Project a WGS84 ring to local meters (equirectangular around the mean
+// latitude), normalized so the outline's bounding box starts at (0, 0).
+// SVG y grows downward, so latitude is flipped (north = up).
+function projectToMeters(ring) {
+  if (!ring || ring.length < 3) return null
+  const lat0 = ring.reduce((sum, p) => sum + p.lat, 0) / ring.length
+  const cos0 = Math.cos((lat0 * Math.PI) / 180)
+  const pts = ring.map((p) => [
+    EARTH_RADIUS_M * ((p.lng * Math.PI) / 180) * cos0,
+    -EARTH_RADIUS_M * ((p.lat * Math.PI) / 180)
+  ])
+  const minX = Math.min(...pts.map(([x]) => x))
+  const minY = Math.min(...pts.map(([, y]) => y))
+  return pts.map(([x, y]) => [x - minX, y - minY])
 }

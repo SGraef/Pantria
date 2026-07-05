@@ -9,7 +9,7 @@
 <p>
   <%= link_to t("common.back"), garden_beds_path, class: "btn btn-secondary" %>
   <%= link_to t("common.edit"), edit_garden_bed_path(@bed), class: "btn btn-secondary" %>
-  <%= link_to t("garden_bed.map_link"), garden_map_path(bed: @bed.id), class: "btn btn-secondary" %>
+  <%= link_to t("garden_bed.map_link"), garden_map_path, class: "btn btn-secondary" %>
 </p>
 
 <% if @bed.notes.present? %><div class="card"><%= simple_format(@bed.notes) %></div><% end %>

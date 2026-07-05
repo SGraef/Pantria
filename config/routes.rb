@@ -116,8 +116,9 @@ Rails.application.routes.draw do
   # locate: address -> viewport (server-side geocoding, admin).
   # parcel: point -> official Flurstück outline + area (server-side WFS proxy).
   resource :garden_map, only: %i[show update] do
-    post :locate
-    get  :parcel
+    post  :locate
+    get   :parcel
+    patch :property # save/clear the Grundstück outline (traced or adopted)
   end
 
   # Project planning: user-defined statuses (= kanban columns) and

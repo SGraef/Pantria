@@ -43,6 +43,21 @@ class GardenMapsController < ApplicationController
     end
   end
 
+  # Saves (or clears, via an empty array) the Grundstück outline -- traced
+  # on the map or adopted from the official parcel. Admin like the rest of
+  # the settings; responds with the server-computed area.
+  def property
+    authorize @settings, :update?
+    ring = Array(params[:property_boundary]).map do |point|
+      point.permit(:lat, :lng).to_h if point.respond_to?(:permit)
+    end
+    if @settings.update(property_boundary: ring.compact.presence)
+      render json: { property_area_sqm: @settings.property_area_sqm&.to_f }
+    else
+      render json: { errors: @settings.errors.full_messages }, status: :unprocessable_content
+    end
+  end
+
   # Point -> official parcel (Flurstück) outline + amtliche Fläche, proxied
   # server-side (the state WFS endpoints publish no CORS headers). Read-only
   # open data -> member-level like viewing the map.

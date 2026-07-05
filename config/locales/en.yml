@@ -439,7 +439,7 @@ en:
       sun_exposure: "Light"
       notes: "Note"
       area: "Area"
-    map_link: "Show on garden map"
+    map_link: "Open garden planner"
     sun:
       full_sun: "Full sun"
       part_shade: "Part shade"
@@ -447,8 +447,7 @@ en:
 
   garden_map:
     title: "Garden map"
-    intro_map: "Trace your beds on the official aerial imagery — sizes and measurements come from the surveyed map data."
-    intro_lite: "Lay out your beds to scale: enter width and length, then drag them into place."
+    intro: "Capture your property (Grundstück) on the official map, then lay out the beds to scale inside its outline."
     beds_link: "Go to beds"
     beds_heading: "Beds"
     no_beds_html: "No beds yet — %{link} first."
@@ -459,13 +458,19 @@ en:
       dop: "Aerial imagery"
       alkis: "Parcels (ALKIS)"
     draw:
-      start: "Draw"
-      redraw: "Redraw"
       finish: "Done"
       cancel: "Cancel"
-      clear: "Remove outline"
       hint: "Click the map to set corner points, then press Done."
       need_points: "Set at least 3 points."
+    property:
+      heading: "Property (Grundstück)"
+      hint: "Trace your property over the aerial imagery — or click \"Show parcel\" and adopt the official outline."
+      draw: "Trace property"
+      redraw: "Retrace property"
+      clear: "Remove outline"
+      area: "Property: %{area} m²"
+    planner:
+      heading: "Garden planner"
     locate:
       label: "Address"
       placeholder: "Street, house number, town"
@@ -478,6 +483,7 @@ en:
       hint: "Click your parcel on the map to fetch its official outline and area."
       official_area: "official area %{area} m²"
       not_found: "No parcel found at this point."
+      adopt: "Adopt as property"
     lite:
       width: "Width (m)"
       length: "Length (m)"

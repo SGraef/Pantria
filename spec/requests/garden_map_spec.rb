@@ -10,22 +10,68 @@ RSpec.describe "GardenMap" do
   describe "GET /garden_map" do
     before { login_via_post(admin) }
 
-    it "renders the map with defaults (Niedersachsen, map mode) before any settings exist" do
+    it "renders map + planner with defaults (Niedersachsen, map mode) before any settings exist" do
       create(:garden_bed, household: household, name: "Raised bed A")
       get garden_map_path
       expect(response).to have_http_status(:ok)
-      expect(response.body).to include("data-controller=\"garden-map\"")
+      expect(response.body).to include("data-controller=\"garden-map\"") # Grundstück capture
+      expect(response.body).to include("data-controller=\"garden-lite\"") # planner below
       expect(response.body).to include("ni_dop20") # LGLN DOP layer in the client config
       expect(response.body).to include("Raised bed A")
     end
 
-    it "renders the lite planner when configured" do
+    it "renders only the planner in lite mode" do
       create(:garden_map_setting, household: household, mode: "lite")
       create(:garden_bed, household: household, width_m: 3, length_m: 1.2)
       get garden_map_path
       expect(response).to have_http_status(:ok)
       expect(response.body).to include("data-controller=\"garden-lite\"")
       expect(response.body).not_to include("data-controller=\"garden-map\"")
+    end
+  end
+
+  describe "PATCH /garden_map/property" do
+    # Roughly 10 m x 10 m square near Hannover => ~100 m2.
+    let(:ring) do
+      step = 10.0 / Garden::Geometry::EARTH_RADIUS_M * 180 / Math::PI
+      lng_step = step / Math.cos(52 * Math::PI / 180)
+      [{ lat: 52.0, lng: 9.0 }, { lat: 52.0, lng: 9.0 + lng_step },
+       { lat: 52.0 + step, lng: 9.0 + lng_step }, { lat: 52.0 + step, lng: 9.0 }]
+    end
+
+    it "saves the Grundstück outline and returns the computed area (admin)" do
+      login_via_post(admin)
+      patch property_garden_map_path, params: { property_boundary: ring }, as: :json
+      expect(response).to have_http_status(:ok)
+      expect(response.parsed_body["property_area_sqm"]).to be_within(1).of(100)
+      expect(household.reload.garden_map_setting.property_boundary.length).to eq(4)
+    end
+
+    it "clears the outline with an empty array" do
+      login_via_post(admin)
+      create(:garden_map_setting, household:         household,
+                                  property_boundary: ring.map { |p| p.transform_keys(&:to_s) })
+      patch property_garden_map_path, params: { property_boundary: [] }, as: :json
+      expect(response).to have_http_status(:ok)
+      settings = household.reload.garden_map_setting
+      expect(settings.property_boundary).to be_nil
+      expect(settings.property_area_sqm).to be_nil
+    end
+
+    it "rejects malformed rings" do
+      login_via_post(admin)
+      patch property_garden_map_path,
+            params: { property_boundary: [{ lat: 999, lng: 9 }, { lat: 52, lng: 9 }, { lat: 52, lng: 10 }] },
+            as:     :json
+      expect(response).to have_http_status(:unprocessable_content)
+    end
+
+    it "denies non-admin members" do
+      member = create(:user)
+      create(:membership, user: member, household: household)
+      login_via_post(member)
+      patch property_garden_map_path, params: { property_boundary: ring }, as: :json
+      expect(household.reload.garden_map_setting&.property_boundary).to be_nil
     end
   end
 

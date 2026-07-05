@@ -1,46 +1,43 @@
 import { Controller } from "@hotwired/stimulus"
 
 // Garden map: official WMS layers (basemap.de base, per-Bundesland DOP20
-// aerial imagery + ALKIS cadastral parcels, see Garden::MapSources) with the
-// household's beds as polygons. Beds are traced by clicking vertices on the
-// map; geometry is PATCHed to the per-bed endpoint and the server-computed
-// area comes back in the response. Leaflet is lazy-imported so only this
-// page downloads it.
+// aerial imagery + ALKIS cadastral parcels, see Garden::MapSources) used to
+// capture ONE geometry -- the household's Grundstück. It is either traced by
+// clicking vertices over the imagery or adopted from the official parcel
+// (Flurstück) under a clicked point. Beds are not mapped; they live in the
+// to-scale planner, which uses this outline as its backdrop.
 //
-// The live area readout mirrors Garden::Geometry (equirectangular projection
-// around the mean latitude + shoelace); the stored value is the server's.
+// Leaflet is lazy-imported so only this page downloads it. The live area
+// readout mirrors Garden::Geometry (equirectangular + shoelace); the stored
+// value is always the server's.
 const EARTH_RADIUS_M = 6378137.0
-
-const BED_COLORS = ["#c97455", "#5b8c5a", "#5a7d8c", "#8c5a7d", "#8c7a5a", "#5a5f8c"]
 
 export default class extends Controller {
   static values = {
     config: Object, // { basemap:, dop:, alkis: } url/layer/attribution each
     center: Array,
     zoom: Number,
-    beds: Array,
+    property: Array, // saved Grundstück ring [{lat, lng}, ...] (may be empty)
     token: String,
-    focusBedId: Number,
+    propertyUrl: String, // PATCH endpoint (blank for non-admin members)
     parcelUrl: String // blank when the Bundesland has no Flurstück source
   }
 
-  static targets = ["map", "readout", "dopToggle", "alkisToggle", "swatch", "bedArea",
-                    "drawControls", "centerLat", "centerLng", "zoom", "parcelButton"]
+  static targets = ["map", "readout", "dopToggle", "alkisToggle",
+                    "drawControls", "adoptControls", "centerLat", "centerLng", "zoom"]
 
   async connect() {
     this.L = await import("leaflet")
     if (!this.hasMapTarget) return // page changed while leaflet loaded
 
-    this.beds = new Map(this.bedsValue.map((bed) => [bed.id, { ...bed }]))
-    this.polygons = new Map()
     this.drawing = null
     this.parcelPicking = false
     this.parcelLayer = null
+    this.pendingParcel = null
+    this.propertyLayer = null
 
     this.initMap()
-    this.renderBeds()
-    this.paintSwatches()
-    this.focusInitialBed()
+    this.renderProperty(this.propertyValue)
   }
 
   disconnect() {
@@ -102,71 +99,20 @@ export default class extends Controller {
     this.zoomTarget.value = this.map.getZoom()
   }
 
-  // -- bed polygons ---------------------------------------------------------
+  // -- Grundstück outline ----------------------------------------------------
 
-  renderBeds() {
-    this.polygons.forEach((polygon) => polygon.remove())
-    this.polygons.clear()
-    this.beds.forEach((bed) => {
-      if (!bed.boundary || bed.boundary.length < 3) return
-      const polygon = this.L.polygon(bed.boundary.map((p) => [p.lat, p.lng]), {
-        color: this.bedColor(bed.id), weight: 2, fillOpacity: 0.25
-      }).addTo(this.map)
-      polygon.bindTooltip(bed.name, { permanent: true, direction: "center", className: "garden-map-label" })
-      polygon.bindPopup(this.popupContent(bed))
-      this.polygons.set(bed.id, polygon)
-    })
-  }
+  renderProperty(ring) {
+    this.propertyLayer?.remove()
+    this.propertyLayer = null
+    if (!ring || ring.length < 3) return
 
-  popupContent(bed) {
-    const root = document.createElement("div")
-    const link = document.createElement("a")
-    link.href = bed.url
-    link.textContent = bed.name
-    const title = document.createElement("strong")
-    title.appendChild(link)
-    root.appendChild(title)
-    if (bed.plantings.length) {
-      const plantings = document.createElement("div")
-      plantings.textContent = bed.plantings.join(", ")
-      root.appendChild(plantings)
+    this.propertyLayer = this.L.polygon(ring.map((p) => [p.lat, p.lng]), {
+      color: "#c97455", weight: 3, fillOpacity: 0.08
+    }).addTo(this.map)
+    if (!this.hasFittedProperty) {
+      this.map.fitBounds(this.propertyLayer.getBounds(), { maxZoom: 19 })
+      this.hasFittedProperty = true
     }
-    if (bed.areaSqm) {
-      const area = document.createElement("div")
-      area.textContent = this.areaLabel(bed.areaSqm)
-      root.appendChild(area)
-    }
-    return root
-  }
-
-  bedColor(bedId) {
-    const index = [...this.beds.keys()].indexOf(bedId)
-    return BED_COLORS[index % BED_COLORS.length]
-  }
-
-  paintSwatches() {
-    this.swatchTargets.forEach((el) => {
-      el.style.background = this.bedColor(Number(el.dataset.bedId))
-    })
-  }
-
-  focusInitialBed() {
-    const polygon = this.polygons.get(this.focusBedIdValue)
-    if (!polygon) return
-    this.map.fitBounds(polygon.getBounds(), { maxZoom: 19 })
-    polygon.openPopup()
-  }
-
-  // -- drawing --------------------------------------------------------------
-
-  startDraw(event) {
-    this.cancelDraw()
-    const bedId = Number(event.currentTarget.dataset.bedId)
-    this.drawing = { bedId, points: [], markers: [], preview: null }
-    this.polygons.get(bedId)?.setStyle({ opacity: 0.3, fillOpacity: 0.05 })
-    this.mapTarget.classList.add("garden-map-drawing")
-    this.drawControlsTarget.hidden = false
-    this.setReadout(this.element.dataset.i18nDrawHint)
   }
 
   mapClicked(e) {
@@ -183,6 +129,16 @@ export default class extends Controller {
     this.updatePreview()
   }
 
+  startDraw() {
+    this.stopParcelPick()
+    this.cancelDraw()
+    this.drawing = { points: [], markers: [], preview: null }
+    this.propertyLayer?.setStyle({ opacity: 0.3, fillOpacity: 0.02 })
+    this.mapTarget.classList.add("garden-map-drawing")
+    this.drawControlsTarget.hidden = false
+    this.setReadout(this.element.dataset.i18nDrawHint)
+  }
+
   updatePreview() {
     const { points } = this.drawing
     this.drawing.preview?.remove()
@@ -195,12 +151,11 @@ export default class extends Controller {
 
   finishDraw() {
     if (!this.drawing) return
-    const { bedId, points } = this.drawing
-    if (points.length < 3) {
+    if (this.drawing.points.length < 3) {
       this.setReadout(this.element.dataset.i18nDrawNeedPoints)
       return
     }
-    this.saveGeometry(bedId, { boundary: points }).then((saved) => {
+    this.saveProperty(this.drawing.points).then((saved) => {
       if (saved) this.cancelDraw()
     })
   }
@@ -209,35 +164,66 @@ export default class extends Controller {
     if (!this.drawing) return
     this.drawing.markers.forEach((m) => m.remove())
     this.drawing.preview?.remove()
-    this.polygons.get(this.drawing.bedId)?.setStyle({ opacity: 1, fillOpacity: 0.25 })
+    this.propertyLayer?.setStyle({ opacity: 1, fillOpacity: 0.08 })
     this.drawing = null
     this.mapTarget.classList.remove("garden-map-drawing")
     this.drawControlsTarget.hidden = true
     this.setReadout("")
   }
 
-  clearBoundary(event) {
-    const bedId = Number(event.currentTarget.dataset.bedId)
-    this.saveGeometry(bedId, { boundary: [] })
+  clearProperty() {
+    this.saveProperty([])
   }
 
-  // -- official parcel (Flurstück) reference layer --------------------------
+  async saveProperty(ring) {
+    try {
+      const response = await fetch(this.propertyUrlValue, {
+        method: "PATCH",
+        headers: {
+          "Content-Type": "application/json",
+          "X-CSRF-Token": this.tokenValue,
+          "Accept": "application/json"
+        },
+        body: JSON.stringify({ property_boundary: ring })
+      })
+      if (!response.ok) throw new Error(`HTTP ${response.status}`)
+      const data = await response.json()
+      this.renderProperty(ring)
+      this.setReadout(data.property_area_sqm ? this.areaLabel(data.property_area_sqm) : "")
+      return true
+    } catch {
+      this.setReadout(this.element.dataset.i18nSaveFailed)
+      return false
+    }
+  }
+
+  // -- official parcel (Flurstück) lookup + adoption --------------------------
 
   // Toggle "pick a parcel" mode: the next map click asks the server for the
   // cadastral parcel at that point (proxied ALKIS WFS) and shows its outline
-  // with the official surveyed area.
-  toggleParcelPick() {
+  // with the official surveyed area; "adopt" saves it as the Grundstück.
+  toggleParcelPick(event) {
     this.cancelDraw()
-    this.parcelPicking = !this.parcelPicking
-    this.parcelButtonTarget.classList.toggle("soft", this.parcelPicking)
-    this.mapTarget.classList.toggle("garden-map-drawing", this.parcelPicking)
     if (this.parcelPicking) {
-      this.setReadout(this.element.dataset.i18nParcelHint)
-    } else {
-      this.parcelLayer?.remove()
-      this.parcelLayer = null
-      this.setReadout("")
+      this.stopParcelPick()
+      return
     }
+    this.parcelPicking = true
+    event.currentTarget.classList.add("soft")
+    this.mapTarget.classList.add("garden-map-drawing")
+    this.setReadout(this.element.dataset.i18nParcelHint)
+  }
+
+  stopParcelPick() {
+    if (!this.parcelPicking) return
+    this.parcelPicking = false
+    this.element.querySelectorAll(".soft").forEach((el) => el.classList.remove("soft"))
+    this.mapTarget.classList.remove("garden-map-drawing")
+    this.parcelLayer?.remove()
+    this.parcelLayer = null
+    this.pendingParcel = null
+    if (this.hasAdoptControlsTarget) this.adoptControlsTarget.hidden = true
+    this.setReadout("")
   }
 
   async fetchParcel(latlng) {
@@ -257,41 +243,18 @@ export default class extends Controller {
     this.parcelLayer = this.L.polygon(parcel.boundary.map((p) => [p.lat, p.lng]), {
       color: "#2d6a9f", weight: 2, dashArray: "8 5", fill: false, interactive: false
     }).addTo(this.map)
+    this.pendingParcel = parcel
+    if (this.hasAdoptControlsTarget) this.adoptControlsTarget.hidden = false
     const official = this.element.dataset.i18nParcelOfficial
       .replace("%{area}", formatArea(parcel.area_sqm))
     this.setReadout(parcel.label ? `${parcel.label} — ${official}` : official)
   }
 
-  // -- persistence ----------------------------------------------------------
-
-  async saveGeometry(bedId, attributes) {
-    const bed = this.beds.get(bedId)
-    try {
-      const response = await fetch(bed.geometryUrl, {
-        method: "PATCH",
-        headers: {
-          "Content-Type": "application/json",
-          "X-CSRF-Token": this.tokenValue,
-          "Accept": "application/json"
-        },
-        body: JSON.stringify({ garden_bed: attributes })
-      })
-      if (!response.ok) throw new Error(`HTTP ${response.status}`)
-      const data = await response.json()
-      if ("boundary" in attributes) bed.boundary = attributes.boundary
-      bed.areaSqm = data.area_sqm
-      this.renderBeds()
-      this.updateBedArea(bedId, data.area_sqm)
-      return true
-    } catch {
-      this.setReadout(this.element.dataset.i18nSaveFailed)
-      return false
-    }
-  }
-
-  updateBedArea(bedId, areaSqm) {
-    const el = this.bedAreaTargets.find((t) => Number(t.dataset.bedId) === bedId)
-    if (el) el.textContent = areaSqm ? this.areaLabel(areaSqm) : ""
+  adoptParcel() {
+    if (!this.pendingParcel) return
+    this.saveProperty(this.pendingParcel.boundary).then((saved) => {
+      if (saved) this.stopParcelPick()
+    })
   }
 
   // -- helpers --------------------------------------------------------------

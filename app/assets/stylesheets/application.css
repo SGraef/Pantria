@@ -842,3 +842,11 @@ pre {
   border-radius: var(--radius-lg, 12px);
   min-height: 3rem;
 }
+
+/* Grundstück outline on the garden planner canvas. */
+.garden-lite-svg .property {
+  fill: none;
+  stroke: var(--accent);
+  stroke-width: 0.08;
+  stroke-linejoin: round;
+}

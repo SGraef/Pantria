@@ -34,6 +34,37 @@ RSpec.describe GardenMapSetting do
     expect(build(:garden_map_setting, center_lng: -181)).not_to be_valid
   end
 
+  describe "property boundary" do
+    # Roughly 10 m x 10 m square near Hannover => ~100 m2.
+    let(:ring) do
+      step = 10.0 / Garden::Geometry::EARTH_RADIUS_M * 180 / Math::PI
+      lng_step = step / Math.cos(52 * Math::PI / 180)
+      [{ "lat" => 52.0, "lng" => 9.0 },
+       { "lat" => 52.0, "lng" => 9.0 + lng_step },
+       { "lat" => 52.0 + step, "lng" => 9.0 + lng_step },
+       { "lat" => 52.0 + step, "lng" => 9.0 }]
+    end
+
+    it "accepts a valid ring and computes the property area on save" do
+      setting = create(:garden_map_setting, property_boundary: ring)
+      expect(setting.property_area_sqm).to be_within(1).of(100)
+      expect(setting).to be_property
+    end
+
+    it "clears the area with the boundary" do
+      setting = create(:garden_map_setting, property_boundary: ring)
+      setting.update!(property_boundary: nil)
+      expect(setting.property_area_sqm).to be_nil
+    end
+
+    it "rejects malformed rings" do
+      expect(build(:garden_map_setting, property_boundary: "shape")).not_to be_valid
+      expect(build(:garden_map_setting, property_boundary: ring.first(2))).not_to be_valid
+      bad = ring.first(2) + [{ "lat" => 999, "lng" => 9.0 }]
+      expect(build(:garden_map_setting, property_boundary: bad)).not_to be_valid
+    end
+  end
+
   it "falls back to the Germany-wide default viewport" do
     setting = build(:garden_map_setting)
     expect(setting.effective_center).to eq(GardenMapSetting::DEFAULT_CENTER)
