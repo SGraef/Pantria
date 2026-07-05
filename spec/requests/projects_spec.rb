@@ -116,4 +116,39 @@ RSpec.describe "Projects" do
       expect(response).to have_http_status(:not_found)
     end
   end
+
+  describe "PATCH /projects/:id/move (board drag, turbo stream)" do
+    it "inserts at the requested position and renumbers the column" do
+      status = household.project_statuses.ordered.first
+      first  = create(:project, household:, project_status: status, position: 10)
+      second = create(:project, household:, project_status: status, position: 20)
+      mover  = create(:project, household:, project_status: household.project_statuses.ordered.second)
+
+      patch move_project_path(mover),
+            params:  { project: { project_status_id: status.id, position: 1 } }.to_json,
+            headers: { "CONTENT_TYPE" => "application/json",
+                       "ACCEPT"       => "text/vnd.turbo-stream.html" }
+
+      expect(response.media_type).to eq("text/vnd.turbo-stream.html")
+      expect(response.body).to include("turbo-stream")
+      order = household.projects.where(project_status: status).order(:position).pluck(:id)
+      expect(order).to eq([first.id, mover.id, second.id])
+      expect(household.projects.where(project_status: status).order(:position).pluck(:position))
+        .to eq([10, 20, 30])
+    end
+
+    it "replaces both source and target columns in the stream" do
+      source = household.project_statuses.ordered.first
+      target = household.project_statuses.ordered.second
+      mover = create(:project, household:, project_status: source)
+
+      patch move_project_path(mover),
+            params:  { project: { project_status_id: target.id, position: 0 } }.to_json,
+            headers: { "CONTENT_TYPE" => "application/json",
+                       "ACCEPT"       => "text/vnd.turbo-stream.html" }
+
+      expect(response.body).to include("column_project_status_#{source.id}")
+      expect(response.body).to include("column_project_status_#{target.id}")
+    end
+  end
 end
