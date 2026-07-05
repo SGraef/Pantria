@@ -1,0 +1,71 @@
+<%# Locals: project, kind ("material"|"plan"), items. Rendered twice on the
+    project page -- materials and plans share one shape. %>
+<section id="<%= kind %>s" class="card" style="margin-bottom:var(--sp-3)">
+  <h2><%= t("project.items.heading_#{kind}") %></h2>
+
+  <% if items.any? %>
+    <table>
+      <thead>
+        <tr>
+          <th><%= t("project.items.name") %></th>
+          <th><%= t("project.items.attachments") %></th>
+          <th><%= t("project.items.cost") %></th>
+          <th></th>
+        </tr>
+      </thead>
+      <tbody>
+        <% items.each do |item| %>
+          <tr>
+            <td>
+              <%= item.name %>
+              <% if item.notes.present? %><br><span class="caption"><%= item.notes %></span><% end %>
+            </td>
+            <td>
+              <% if item.url.present? %>
+                <%= link_to t("project.items.link"), item.url, target: "_blank", rel: "noopener noreferrer" %>
+              <% end %>
+              <% if item.file.attached? %>
+                <%= link_to t("project.items.file"), rails_blob_path(item.file, disposition: "inline"),
+                            target: "_blank", rel: "noopener" %>
+              <% end %>
+            </td>
+            <td><%= project_money(item.cost_cents) if item.cost_cents %></td>
+            <td>
+              <%= button_to t("common.delete"), project_item_path(project, item), method: :delete,
+                            class: "btn btn-sm warn",
+                            data: { turbo_confirm: t("project.items.remove_confirm", name: item.name) },
+                            form: { style: "display:inline" } %>
+            </td>
+          </tr>
+        <% end %>
+      </tbody>
+    </table>
+    <p class="caption">
+      <%= t("project.items.sum", sum: project_money(items.sum { |i| i.cost_cents.to_i })) %>
+    </p>
+  <% else %>
+    <p class="caption"><%= t("project.items.empty_#{kind}") %></p>
+  <% end %>
+
+  <%= form_with url: project_items_path(project), local: true, multipart: true,
+                html: { style: "display:flex;gap:var(--sp-2);flex-wrap:wrap;align-items:flex-end" } do |f| %>
+    <%= hidden_field_tag "project_item[kind]", kind %>
+    <span style="flex:1 1 12rem">
+      <%= label_tag "#{kind}_name", t("project.items.name") %><br>
+      <%= text_field_tag "project_item[name]", nil, id: "#{kind}_name", required: true, style: "width:100%" %>
+    </span>
+    <span style="flex:1 1 12rem">
+      <%= label_tag "#{kind}_url", t("project.items.url") %><br>
+      <%= url_field_tag "project_item[url]", nil, id: "#{kind}_url", placeholder: "https://…", style: "width:100%" %>
+    </span>
+    <span style="flex:0 0 10rem">
+      <%= label_tag "#{kind}_file", t("project.items.file") %><br>
+      <%= file_field_tag "project_item[file]", id: "#{kind}_file", accept: ProjectItem::ACCEPTED_MIME_TYPES.join(",") %>
+    </span>
+    <span style="flex:0 0 7rem">
+      <%= label_tag "#{kind}_cost", t("project.items.cost") %><br>
+      <%= number_field_tag "project_item[cost]", nil, id: "#{kind}_cost", step: 0.01, min: 0, style: "width:100%" %>
+    </span>
+    <%= f.submit t("project.items.add_#{kind}"), class: "btn btn-sm" %>
+  <% end %>
+</section>

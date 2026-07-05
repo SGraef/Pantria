@@ -1,0 +1,42 @@
+<%# Locals: project, discussion. %>
+<div class="card card-flat" style="margin-bottom:var(--sp-2)">
+  <p style="display:flex;gap:var(--sp-2);align-items:center;flex-wrap:wrap;margin:0">
+    <strong><%= discussion.title %></strong>
+    <span class="pill <%= discussion.resolved? ? "success" : "warn" %>">
+      <%= t("project.discussions.status_#{discussion.status}") %>
+    </span>
+    <span style="margin-left:auto;display:flex;gap:var(--sp-1)">
+      <% if discussion.resolved? %>
+        <%= button_to t("project.discussions.reopen"), reopen_project_discussion_path(project, discussion),
+                      method: :post, class: "btn btn-sm secondary", form: { style: "display:inline" } %>
+      <% else %>
+        <%= button_to t("project.discussions.resolve"), resolve_project_discussion_path(project, discussion),
+                      method: :post, class: "btn btn-sm", form: { style: "display:inline" } %>
+      <% end %>
+      <%= button_to t("common.delete"), project_discussion_path(project, discussion), method: :delete,
+                    class: "btn btn-sm warn",
+                    data: { turbo_confirm: t("project.discussions.remove_confirm") },
+                    form: { style: "display:inline" } %>
+    </span>
+  </p>
+
+  <% discussion.project_discussion_comments.each do |comment| %>
+    <p style="margin:var(--sp-2) 0 0">
+      <span class="caption"><%= member_name(comment.user) %> · <%= l(comment.created_at, format: :short) %></span><br>
+      <%= simple_format(comment.body) %>
+      <% if policy(comment).destroy? %>
+        <%= button_to t("common.delete"), project_discussion_comment_path(discussion, comment),
+                      method: :delete, class: "btn btn-sm secondary", form: { style: "display:inline" } %>
+      <% end %>
+    </p>
+  <% end %>
+
+  <%= form_with url: project_discussion_comments_path(discussion), local: true,
+                html: { style: "display:flex;gap:var(--sp-1);align-items:flex-end;margin-top:var(--sp-2)" } do |f| %>
+    <span style="flex:1">
+      <%= text_area_tag "project_discussion_comment[body]", nil, rows: 2, required: true,
+                        placeholder: t("project.discussions.comment_placeholder"), style: "width:100%" %>
+    </span>
+    <%= f.submit t("project.discussions.comment_button"), class: "btn btn-sm" %>
+  <% end %>
+</div>

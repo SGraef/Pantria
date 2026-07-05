@@ -780,3 +780,65 @@ pre {
 .chip-color-sand       { background: var(--warning-soft);   color: var(--warning); }
 .chip-color-terracotta { background: var(--danger-soft);    color: var(--danger); }
 .chip-color-sky        { background: var(--info-soft);      color: var(--info); }
+
+/* ---- Project kanban board ------------------------------------ */
+/* Own horizontal scroll context: <main> clips overflow-x globally. */
+.project-board {
+  display: flex;
+  gap: var(--sp-3);
+  align-items: flex-start;
+  overflow-x: auto;
+  padding-bottom: var(--sp-2);
+}
+.board-column {
+  flex: 0 0 272px;
+  min-width: 0;
+  background: var(--bg-sunken);
+  border-radius: var(--radius-lg, 12px);
+  padding: var(--sp-2);
+}
+.board-column__header {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-1);
+  padding: 0 var(--sp-1) var(--sp-2);
+}
+.board-column__dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: var(--border-strong);
+  flex: none;
+}
+.board-column__cards {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-2);
+  min-height: 2.5rem; /* empty columns stay droppable */
+}
+.board-card { padding: var(--sp-3); }
+.board-card__head { display: flex; gap: var(--sp-1); align-items: baseline; }
+.board-card__title { font-weight: 600; }
+.board-card__grip { cursor: grab; touch-action: none; color: var(--fg-2); user-select: none; }
+.board-card__meta {
+  display: flex;
+  gap: var(--sp-1);
+  flex-wrap: wrap;
+  align-items: center;
+  margin: var(--sp-1) 0 0;
+}
+.board-card__fallback { display: flex; gap: var(--sp-1); margin-top: var(--sp-2); }
+.board--js .board-card__fallback { display: none; }
+.board-card--dragging { opacity: 0.4; }
+.board-card-ghost {
+  position: fixed;
+  pointer-events: none;
+  z-index: 50;
+  width: 240px;
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.25);
+}
+.board-card-placeholder {
+  border: 2px dashed var(--border-default);
+  border-radius: var(--radius-lg, 12px);
+  min-height: 3rem;
+}

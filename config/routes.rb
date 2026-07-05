@@ -131,6 +131,17 @@ Rails.application.routes.draw do
   resources :projects do
     member { patch :move } # kanban drag + no-JS fallback
     resources :relations, only: %i[create destroy], controller: "project_relations"
+    resources :items, only: %i[create update destroy], controller: "project_items"
+    resources :discussions, only: %i[create destroy], controller: "project_discussions" do
+      member do
+        post :resolve
+        post :reopen
+      end
+    end
+  end
+  # Comments sit flat under discussions to respect the two-level nesting cap.
+  resources :project_discussions, only: [] do
+    resources :comments, only: %i[create destroy], controller: "project_discussion_comments"
   end
 
   resources :todos do

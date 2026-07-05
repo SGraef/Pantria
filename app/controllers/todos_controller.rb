@@ -22,7 +22,8 @@ class TodosController < ApplicationController
   end
 
   def new
-    @todo = current_household.todos.new
+    # ?project_id= prefills the project select when coming from a project page.
+    @todo = current_household.todos.new(project_id: params[:project_id])
     authorize @todo
   end
 
@@ -94,7 +95,7 @@ class TodosController < ApplicationController
   end
 
   def todo_params
-    params.require(:todo).permit(:title, :description, :status, :assignee_id, :due_on)
+    params.require(:todo).permit(:title, :description, :status, :assignee_id, :due_on, :project_id)
   end
 
   def ensure_household

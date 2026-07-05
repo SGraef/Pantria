@@ -1,0 +1,15 @@
+<%# Locals: status. Reads the board ivars from ProjectsController#load_board;
+    re-rendered by move.turbo_stream.erb, so keep it self-contained. %>
+<% column_projects = @projects.select { |p| p.project_status_id == status.id } %>
+<section id="<%= dom_id(status, :column) %>" class="board-column">
+  <header class="board-column__header">
+    <span class="board-column__dot <%= "chip-color-#{status.color}" if status.color.present? %>"></span>
+    <strong><%= status.name %></strong>
+    <span class="caption"><%= column_projects.size %></span>
+  </header>
+  <div class="board-column__cards" data-board-target="column" data-status-id="<%= status.id %>">
+    <% column_projects.each do |project| %>
+      <%= render "card", project: project %>
+    <% end %>
+  </div>
+</section>

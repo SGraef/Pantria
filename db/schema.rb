@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2026_07_06_000004) do
+ActiveRecord::Schema[8.0].define(version: 2026_07_06_000008) do
   create_table "active_storage_attachments", charset: "utf8mb4", collation: "utf8mb4_0900_ai_ci", force: :cascade do |t|
     t.string "name", null: false
     t.string "record_type", null: false
@@ -517,6 +517,48 @@ ActiveRecord::Schema[8.0].define(version: 2026_07_06_000004) do
     t.index ["household_id"], name: "index_project_categories_on_household_id"
   end
 
+  create_table "project_discussion_comments", charset: "utf8mb4", collation: "utf8mb4_unicode_ci", force: :cascade do |t|
+    t.bigint "household_id", null: false
+    t.bigint "project_discussion_id", null: false
+    t.bigint "user_id"
+    t.text "body", null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["household_id"], name: "index_project_discussion_comments_on_household_id"
+    t.index ["project_discussion_id"], name: "index_project_discussion_comments_on_project_discussion_id"
+    t.index ["user_id"], name: "index_project_discussion_comments_on_user_id"
+  end
+
+  create_table "project_discussions", charset: "utf8mb4", collation: "utf8mb4_unicode_ci", force: :cascade do |t|
+    t.bigint "household_id", null: false
+    t.bigint "project_id", null: false
+    t.string "title", null: false
+    t.string "status", default: "open", null: false
+    t.bigint "creator_id"
+    t.datetime "resolved_at"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["creator_id"], name: "index_project_discussions_on_creator_id"
+    t.index ["household_id"], name: "index_project_discussions_on_household_id"
+    t.index ["project_id", "status"], name: "index_project_discussions_on_project_id_and_status"
+    t.index ["project_id"], name: "index_project_discussions_on_project_id"
+  end
+
+  create_table "project_items", charset: "utf8mb4", collation: "utf8mb4_unicode_ci", force: :cascade do |t|
+    t.bigint "household_id", null: false
+    t.bigint "project_id", null: false
+    t.string "kind", null: false
+    t.string "name", null: false
+    t.string "url"
+    t.integer "cost_cents"
+    t.text "notes"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["household_id"], name: "index_project_items_on_household_id"
+    t.index ["project_id", "kind"], name: "index_project_items_on_project_id_and_kind"
+    t.index ["project_id"], name: "index_project_items_on_project_id"
+  end
+
   create_table "project_relations", charset: "utf8mb4", collation: "utf8mb4_unicode_ci", force: :cascade do |t|
     t.bigint "household_id", null: false
     t.bigint "project_id", null: false
@@ -856,11 +898,13 @@ ActiveRecord::Schema[8.0].define(version: 2026_07_06_000004) do
     t.string "source", default: "manual", null: false
     t.bigint "source_calendar_event_id"
     t.bigint "source_document_id"
+    t.bigint "project_id"
     t.index ["assignee_id"], name: "index_todos_on_assignee_id"
     t.index ["creator_id"], name: "index_todos_on_creator_id"
     t.index ["household_id", "due_on"], name: "index_todos_on_household_id_and_due_on"
     t.index ["household_id", "status"], name: "index_todos_on_household_id_and_status"
     t.index ["household_id"], name: "index_todos_on_household_id"
+    t.index ["project_id"], name: "index_todos_on_project_id"
     t.index ["source_calendar_event_id"], name: "index_todos_on_source_calendar_event_id"
     t.index ["source_document_id"], name: "index_todos_on_source_document_id"
   end
@@ -935,6 +979,14 @@ ActiveRecord::Schema[8.0].define(version: 2026_07_06_000004) do
   add_foreign_key "product_synonyms", "products"
   add_foreign_key "products", "households"
   add_foreign_key "project_categories", "households"
+  add_foreign_key "project_discussion_comments", "households"
+  add_foreign_key "project_discussion_comments", "project_discussions"
+  add_foreign_key "project_discussion_comments", "users"
+  add_foreign_key "project_discussions", "households"
+  add_foreign_key "project_discussions", "projects"
+  add_foreign_key "project_discussions", "users", column: "creator_id"
+  add_foreign_key "project_items", "households"
+  add_foreign_key "project_items", "projects"
   add_foreign_key "project_relations", "households"
   add_foreign_key "project_relations", "projects"
   add_foreign_key "project_relations", "projects", column: "related_project_id"
@@ -974,6 +1026,7 @@ ActiveRecord::Schema[8.0].define(version: 2026_07_06_000004) do
   add_foreign_key "todos", "calendar_events", column: "source_calendar_event_id"
   add_foreign_key "todos", "documents", column: "source_document_id"
   add_foreign_key "todos", "households"
+  add_foreign_key "todos", "projects"
   add_foreign_key "todos", "users", column: "assignee_id"
   add_foreign_key "todos", "users", column: "creator_id"
 end

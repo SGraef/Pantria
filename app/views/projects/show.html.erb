@@ -1,0 +1,154 @@
+<% content_for :title, @project.name %>
+<h1><%= @project.name %></h1>
+<p class="caption" style="display:flex;gap:var(--sp-2);align-items:center;flex-wrap:wrap">
+  <%= color_chip(@project.project_status.name, @project.project_status.color) %>
+  <% if @project.project_category %>
+    <%= color_chip(@project.project_category.name, @project.project_category.color) %>
+  <% end %>
+  <% if @project.blocked? %><span class="pill danger"><%= t("project.card.blocked") %></span><% end %>
+  <% if @project.parent %>
+    <span><%= t("project.show.part_of") %> <%= link_to @project.parent.name, project_path(@project.parent) %></span>
+  <% end %>
+</p>
+
+<p>
+  <%= link_to t("common.back"), projects_path, class: "btn btn-secondary" %>
+  <%= link_to t("common.edit"), edit_project_path(@project), class: "btn btn-secondary" %>
+  <%= button_to t("common.delete"), project_path(@project), method: :delete, class: "btn btn-danger",
+                data: { turbo_confirm: t("project.show.delete_confirm") }, form: { style: "display:inline" } %>
+</p>
+
+<% if @project.description.present? %>
+  <div class="card"><%= simple_format(@project.description) %></div>
+<% end %>
+
+<%# ---- budget vs. actual -------------------------------------------------- %>
+<div class="card <%= "card-warn" if @project.over_budget?(@actual_cost_cents) %>">
+  <h2><%= t("project.show.costs") %></h2>
+  <p style="font-size:var(--fs-2xl);font-weight:600;margin:0">
+    <%= project_money(@actual_cost_cents) %>
+    <% if @project.budget_cents %>
+      <span class="caption" style="font-weight:400">
+        <%= t("project.show.of_budget", budget: project_money(@project.budget_cents)) %>
+      </span>
+      <% if @project.over_budget?(@actual_cost_cents) %>
+        <span class="pill danger"><%= t("project.card.over_budget") %></span>
+      <% end %>
+    <% end %>
+  </p>
+  <% if @children.any? %>
+    <p class="caption"><%= t("project.show.includes_subprojects", own: project_money(@project.own_cost_cents)) %></p>
+  <% end %>
+</div>
+
+<%# ---- subprojects ---------------------------------------------------------- %>
+<div class="card" style="margin-bottom:var(--sp-3)">
+  <h2><%= t("project.show.subprojects") %></h2>
+  <% if @children.any? %>
+    <ul>
+      <% @children.each do |child| %>
+        <li>
+          <%= link_to child.name, project_path(child) %>
+          <%= color_chip(child.project_status.name, child.project_status.color) %>
+        </li>
+      <% end %>
+    </ul>
+  <% else %>
+    <p class="caption"><%= t("project.show.no_subprojects") %></p>
+  <% end %>
+  <p><%= link_to t("project.show.add_subproject"), new_project_path(parent_id: @project.id), class: "btn btn-sm btn-secondary" %></p>
+</div>
+
+<%# ---- relations ------------------------------------------------------------ %>
+<section id="relations" class="card" style="margin-bottom:var(--sp-3)">
+  <h2><%= t("project.relations.heading") %></h2>
+  <% blocked_by = @project.relations.select { |r| r.kind == "blocked_by" } %>
+  <% related    = @project.relations.select { |r| r.kind == "related" } %>
+  <% blocks     = @project.inverse_relations.select { |r| r.kind == "blocked_by" } %>
+
+  <% if blocked_by.none? && related.none? && blocks.none? %>
+    <p class="caption"><%= t("project.relations.empty") %></p>
+  <% end %>
+  <% { "blocked_by" => blocked_by, "related" => related }.each do |kind, relations| %>
+    <% next if relations.none? %>
+    <p style="margin-bottom:var(--sp-1)"><strong><%= t("project.relations.kinds.#{kind}") %></strong></p>
+    <ul>
+      <% relations.each do |relation| %>
+        <li>
+          <%= link_to relation.related_project.name, project_path(relation.related_project) %>
+          <%= button_to "×", project_relation_path(@project, relation), method: :delete,
+                        class: "btn btn-sm secondary", form: { style: "display:inline" },
+                        title: t("project.relations.remove") %>
+        </li>
+      <% end %>
+    </ul>
+  <% end %>
+  <% if blocks.any? %>
+    <p style="margin-bottom:var(--sp-1)"><strong><%= t("project.relations.blocks") %></strong></p>
+    <ul>
+      <% blocks.each do |relation| %>
+        <li><%= link_to relation.project.name, project_path(relation.project) %></li>
+      <% end %>
+    </ul>
+  <% end %>
+
+  <% candidates = current_household.projects.ordered.where.not(id: @project.id) %>
+  <% if candidates.any? %>
+    <%= form_with url: project_relations_path(@project), local: true,
+                  html: { style: "display:flex;gap:var(--sp-2);flex-wrap:wrap;align-items:flex-end" } do |f| %>
+      <span>
+        <%= label_tag "project_relation[kind]", t("project.relations.kind") %><br>
+        <%= select_tag "project_relation[kind]",
+                       options_for_select(ProjectRelation::KINDS.map { |k| [t("project.relations.kinds.#{k}"), k] }) %>
+      </span>
+      <span style="flex:1 1 12rem">
+        <%= label_tag "project_relation[related_project_id]", t("project.relations.project") %><br>
+        <%= select_tag "project_relation[related_project_id]",
+                       options_from_collection_for_select(candidates, :id, :name), style: "width:100%" %>
+      </span>
+      <%= f.submit t("project.relations.add"), class: "btn btn-sm" %>
+    <% end %>
+  <% end %>
+</section>
+
+<%# ---- materials & plans ---------------------------------------------------- %>
+<%= render "items_section", project: @project, kind: "material", items: @materials %>
+<%= render "items_section", project: @project, kind: "plan", items: @plans %>
+
+<%# ---- todos ----------------------------------------------------------------- %>
+<section id="todos" class="card" style="margin-bottom:var(--sp-3)">
+  <h2><%= t("project.show.todos") %></h2>
+  <% if @todos.any? %>
+    <ul>
+      <% @todos.each do |todo| %>
+        <li>
+          <%= link_to todo.title, todo_path(todo) %>
+          <%= todo_status_badge(todo) %>
+          <% if todo.due_on %><span class="caption"><%= l(todo.due_on) %></span><% end %>
+        </li>
+      <% end %>
+    </ul>
+  <% else %>
+    <p class="caption"><%= t("project.show.no_todos") %></p>
+  <% end %>
+  <p><%= link_to t("project.show.add_todo"), new_todo_path(project_id: @project.id), class: "btn btn-sm btn-secondary" %></p>
+</section>
+
+<%# ---- discussions ------------------------------------------------------------ %>
+<section id="discussions" class="card">
+  <h2><%= t("project.discussions.heading") %></h2>
+  <% if @discussions.none? %>
+    <p class="caption"><%= t("project.discussions.empty") %></p>
+  <% end %>
+  <%= render partial: "discussion", collection: @discussions, locals: { project: @project } %>
+
+  <%= form_with url: project_discussions_path(@project), local: true,
+                html: { style: "display:flex;gap:var(--sp-1);align-items:flex-end;margin-top:var(--sp-2)" } do |f| %>
+    <span style="flex:1">
+      <%= label_tag "project_discussion[title]", t("project.discussions.new_label") %><br>
+      <%= text_field_tag "project_discussion[title]", nil, required: true,
+                         placeholder: t("project.discussions.title_placeholder"), style: "width:100%" %>
+    </span>
+    <%= f.submit t("project.discussions.add"), class: "btn btn-sm" %>
+  <% end %>
+</section>
