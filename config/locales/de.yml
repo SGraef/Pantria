@@ -461,6 +461,18 @@ de:
       clear: "Umriss entfernen"
       hint: "Klicke auf die Karte, um Eckpunkte zu setzen, dann auf Fertig."
       need_points: "Mindestens 3 Punkte setzen."
+    locate:
+      label: "Adresse"
+      placeholder: "Straße, Hausnummer, Ort"
+      button: "Suchen"
+      help: "Sucht die Adresse (OpenStreetMap) und springt auf der Karte dorthin. Danach Einstellungen speichern, um die Ansicht zu behalten."
+      found: "Gefunden: %{place}"
+      not_found: "Adresse nicht gefunden — versuche es mit Ort oder Postleitzahl."
+    parcel:
+      button: "Flurstück anzeigen"
+      hint: "Klicke dein Grundstück auf der Karte an, um Umriss und amtliche Fläche abzurufen."
+      official_area: "amtliche Fläche %{area} m²"
+      not_found: "An diesem Punkt wurde kein Flurstück gefunden."
     lite:
       width: "Breite (m)"
       length: "Länge (m)"

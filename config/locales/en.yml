@@ -455,6 +455,18 @@ en:
       clear: "Remove outline"
       hint: "Click the map to set corner points, then press Done."
       need_points: "Set at least 3 points."
+    locate:
+      label: "Address"
+      placeholder: "Street, house number, town"
+      button: "Find"
+      help: "Looks up the address (OpenStreetMap) and jumps the map there. Save the settings afterwards to keep the view."
+      found: "Found: %{place}"
+      not_found: "Address not found — try adding the town or postal code."
+    parcel:
+      button: "Show parcel"
+      hint: "Click your parcel on the map to fetch its official outline and area."
+      official_area: "official area %{area} m²"
+      not_found: "No parcel found at this point."
     lite:
       width: "Width (m)"
       length: "Length (m)"

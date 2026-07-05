@@ -2,6 +2,16 @@
     viewport fields are kept fresh by garden_map_controller on every map
     move, so saving the form also saves "where the map was". %>
 <h2><%= t("garden_map.settings.heading") %></h2>
+
+<%# Address jump: separate form (posts to locate), geocoded server-side. %>
+<%= form_with url: locate_garden_map_path, method: :post, local: true do %>
+  <p>
+    <%= label_tag :address, t("garden_map.locate.label") %><br>
+    <%= text_field_tag :address, settings.address, placeholder: t("garden_map.locate.placeholder"), maxlength: 200 %>
+    <%= submit_tag t("garden_map.locate.button"), class: "btn btn-secondary btn-sm" %>
+  </p>
+  <p class="caption"><%= t("garden_map.locate.help") %></p>
+<% end %>
 <%= form_with model: settings, url: garden_map_path, method: :patch, local: true do |f| %>
   <% if settings.errors.any? %>
     <div class="flash alert"><%= settings.errors.full_messages.to_sentence %></div>

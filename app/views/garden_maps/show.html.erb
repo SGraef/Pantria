@@ -21,15 +21,23 @@
        data-garden-map-beds-value="<%= garden_map_beds_json(@garden_beds).to_json %>"
        data-garden-map-token-value="<%= form_authenticity_token %>"
        data-garden-map-focus-bed-id-value="<%= params[:bed].to_i %>"
+       data-garden-map-parcel-url-value="<%= Garden::MapSources.parcel_source(@settings) ? parcel_garden_map_path : "" %>"
        data-i18n-draw-hint="<%= t("garden_map.draw.hint") %>"
        data-i18n-draw-need-points="<%= t("garden_map.draw.need_points") %>"
        data-i18n-save-failed="<%= t("garden_map.save_failed") %>"
-       data-i18n-area-label="<%= t("garden_map.area_label") %>">
+       data-i18n-area-label="<%= t("garden_map.area_label") %>"
+       data-i18n-parcel-hint="<%= t("garden_map.parcel.hint") %>"
+       data-i18n-parcel-official="<%= t("garden_map.parcel.official_area") %>"
+       data-i18n-parcel-not-found="<%= t("garden_map.parcel.not_found") %>">
     <div class="garden-map-toolbar">
       <label><input type="checkbox" data-garden-map-target="dopToggle"
                     data-action="garden-map#toggleDop"> <%= t("garden_map.layers.dop") %></label>
       <label><input type="checkbox" data-garden-map-target="alkisToggle"
                     data-action="garden-map#toggleAlkis"> <%= t("garden_map.layers.alkis") %></label>
+      <% if Garden::MapSources.parcel_source(@settings) %>
+        <button type="button" class="btn btn-sm btn-secondary" data-garden-map-target="parcelButton"
+                data-action="garden-map#toggleParcelPick"><%= t("garden_map.parcel.button") %></button>
+      <% end %>
       <span class="caption" data-garden-map-target="readout"></span>
     </div>
     <div class="garden-map" data-garden-map-target="map"></div>

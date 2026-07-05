@@ -52,6 +52,30 @@ RSpec.describe "GardenMap" do
       end
     end
 
+    context "when using the address lookup" do
+      before { login_via_post(admin) }
+
+      it "geocodes and saves the viewport" do
+        stub_request(:get, %r{nominatim\.openstreetmap\.org/search}).to_return(
+          status: 200,
+          body:   [{ lat: "52.3705", lon: "9.7332", display_name: "Hannover" }].to_json
+        )
+        post locate_garden_map_path, params: { address: "Hannah-Arendt-Platz 1, Hannover" }
+        expect(response).to redirect_to(garden_map_path)
+        settings = household.reload.garden_map_setting
+        expect(settings.center_lat.to_f).to eq(52.3705)
+        expect(settings.zoom).to eq(GardenMapsController::LOCATE_ZOOM)
+        expect(settings.address).to include("Hannah-Arendt-Platz")
+      end
+
+      it "reports an unresolvable address without saving" do
+        stub_request(:get, %r{nominatim\.openstreetmap\.org/search}).to_return(status: 200, body: "[]")
+        post locate_garden_map_path, params: { address: "Nowhere 99" }
+        expect(response).to redirect_to(garden_map_path)
+        expect(flash[:alert]).to eq(I18n.t("garden_map.locate.not_found"))
+      end
+    end
+
     context "when signed in as a non-admin member" do
       let(:member) { create(:user) }
 
@@ -69,6 +93,39 @@ RSpec.describe "GardenMap" do
         expect(response).to redirect_to(root_path) # Pundit denial
         expect(GardenMapSetting.count).to eq(0)
       end
+
+      it "cannot use the address lookup" do
+        post locate_garden_map_path, params: { address: "Hannover" }
+        expect(response).to redirect_to(root_path) # Pundit denial
+      end
+    end
+  end
+
+  describe "GET /garden_map/parcel" do
+    let(:gml) { Rails.root.join("spec/fixtures/garden/alkis_flurstueck.xml").read }
+
+    before { login_via_post(admin) }
+
+    it "returns the official parcel at a point as JSON (member-level)" do
+      stub_request(:get, /opendata\.lgln\.niedersachsen\.de/).to_return(status: 200, body: gml)
+      get parcel_garden_map_path, params: { lat: 52.3705, lng: 9.7332 }
+      expect(response).to have_http_status(:ok)
+      body = response.parsed_body
+      expect(body["area_sqm"]).to eq(13_452.0)
+      expect(body["boundary"].length).to eq(4)
+      expect(body["label"]).to eq("Hannah-Arendt-Platz 1")
+    end
+
+    it "404s when no parcel is found" do
+      stub_request(:get, /opendata\.lgln\.niedersachsen\.de/).to_return(status: 502)
+      get parcel_garden_map_path, params: { lat: 52.3705, lng: 9.7332 }
+      expect(response).to have_http_status(:not_found)
+    end
+
+    it "422s when the Bundesland has no parcel source" do
+      create(:garden_map_setting, household: household, bundesland: "nw")
+      get parcel_garden_map_path, params: { lat: 52.3705, lng: 9.7332 }
+      expect(response).to have_http_status(:unprocessable_content)
     end
   end
 end

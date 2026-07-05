@@ -113,7 +113,12 @@ Rails.application.routes.draw do
 
   # Visual garden overview (Leaflet over official WMS layers, or the lite
   # planner). Singular: one map per household; update = admin settings form.
-  resource :garden_map, only: %i[show update]
+  # locate: address -> viewport (server-side geocoding, admin).
+  # parcel: point -> official Flurstück outline + area (server-side WFS proxy).
+  resource :garden_map, only: %i[show update] do
+    post :locate
+    get  :parcel
+  end
 
   resources :todos do
     member do

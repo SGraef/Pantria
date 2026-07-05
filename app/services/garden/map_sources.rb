@@ -23,16 +23,22 @@ module Garden
 
     STATES = {
       "ni" => {
-        name:  "Niedersachsen",
-        dop:   {
+        name:    "Niedersachsen",
+        dop:     {
           url:         "https://opendata.lgln.niedersachsen.de/doorman/noauth/dop_wms",
           layer:       "ni_dop20",
           attribution: "&copy; LGLN, CC BY 4.0"
         },
-        alkis: {
+        alkis:   {
           url:         "https://opendata.lgln.niedersachsen.de/doorman/noauth/alkis_wms",
           layer:       "ALKIS",
           attribution: "&copy; LGLN, CC BY 4.0"
+        },
+        # Vector Flurstücke for the parcel lookup (WFS 2.0, GML out, see
+        # Garden::ParcelLookup for the query mechanics -- verified live).
+        parcels: {
+          url:       "https://opendata.lgln.niedersachsen.de/doorman/noauth/alkis_wfs_einfach",
+          type_name: "ave:Flurstueck"
         }
       },
       "nw" => {
@@ -77,6 +83,14 @@ module Garden
           state = fetch(setting.bundesland) || {}
           { basemap: BASEMAP, dop: state[:dop], alkis: state[:alkis] }
         end
+      end
+
+      # The Flurstück vector source for the parcel lookup, when the
+      # household's Bundesland ships one (nil for custom/unregistered).
+      # @param setting [GardenMapSetting]
+      # @return [Hash, nil]
+      def parcel_source(setting)
+        fetch(setting.bundesland)&.dig(:parcels)
       end
 
       private

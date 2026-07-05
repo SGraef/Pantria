@@ -20,11 +20,12 @@ export default class extends Controller {
     zoom: Number,
     beds: Array,
     token: String,
-    focusBedId: Number
+    focusBedId: Number,
+    parcelUrl: String // blank when the Bundesland has no Flurstück source
   }
 
-  static targets = ["map", "readout", "dopToggle", "alkisToggle", "swatch",
-                    "bedArea", "drawControls", "centerLat", "centerLng", "zoom"]
+  static targets = ["map", "readout", "dopToggle", "alkisToggle", "swatch", "bedArea",
+                    "drawControls", "centerLat", "centerLng", "zoom", "parcelButton"]
 
   async connect() {
     this.L = await import("leaflet")
@@ -33,6 +34,8 @@ export default class extends Controller {
     this.beds = new Map(this.bedsValue.map((bed) => [bed.id, { ...bed }]))
     this.polygons = new Map()
     this.drawing = null
+    this.parcelPicking = false
+    this.parcelLayer = null
 
     this.initMap()
     this.renderBeds()
@@ -167,6 +170,10 @@ export default class extends Controller {
   }
 
   mapClicked(e) {
+    if (this.parcelPicking) {
+      this.fetchParcel(e.latlng)
+      return
+    }
     if (!this.drawing) return
     const point = { lat: e.latlng.lat, lng: e.latlng.lng }
     this.drawing.points.push(point)
@@ -212,6 +219,47 @@ export default class extends Controller {
   clearBoundary(event) {
     const bedId = Number(event.currentTarget.dataset.bedId)
     this.saveGeometry(bedId, { boundary: [] })
+  }
+
+  // -- official parcel (Flurstück) reference layer --------------------------
+
+  // Toggle "pick a parcel" mode: the next map click asks the server for the
+  // cadastral parcel at that point (proxied ALKIS WFS) and shows its outline
+  // with the official surveyed area.
+  toggleParcelPick() {
+    this.cancelDraw()
+    this.parcelPicking = !this.parcelPicking
+    this.parcelButtonTarget.classList.toggle("soft", this.parcelPicking)
+    this.mapTarget.classList.toggle("garden-map-drawing", this.parcelPicking)
+    if (this.parcelPicking) {
+      this.setReadout(this.element.dataset.i18nParcelHint)
+    } else {
+      this.parcelLayer?.remove()
+      this.parcelLayer = null
+      this.setReadout("")
+    }
+  }
+
+  async fetchParcel(latlng) {
+    this.setReadout("…")
+    try {
+      const url = `${this.parcelUrlValue}?lat=${latlng.lat}&lng=${latlng.lng}`
+      const response = await fetch(url, { headers: { "Accept": "application/json" } })
+      if (!response.ok) throw new Error(`HTTP ${response.status}`)
+      this.showParcel(await response.json())
+    } catch {
+      this.setReadout(this.element.dataset.i18nParcelNotFound)
+    }
+  }
+
+  showParcel(parcel) {
+    this.parcelLayer?.remove()
+    this.parcelLayer = this.L.polygon(parcel.boundary.map((p) => [p.lat, p.lng]), {
+      color: "#2d6a9f", weight: 2, dashArray: "8 5", fill: false, interactive: false
+    }).addTo(this.map)
+    const official = this.element.dataset.i18nParcelOfficial
+      .replace("%{area}", formatArea(parcel.area_sqm))
+    this.setReadout(parcel.label ? `${parcel.label} — ${official}` : official)
   }
 
   // -- persistence ----------------------------------------------------------

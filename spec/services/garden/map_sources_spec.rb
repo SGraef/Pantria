@@ -23,6 +23,14 @@ RSpec.describe Garden::MapSources do
     end
   end
 
+  describe ".parcel_source" do
+    it "returns the Flurstück WFS for states that ship one, else nil" do
+      expect(described_class.parcel_source(build(:garden_map_setting))[:type_name]).to eq("ave:Flurstueck")
+      expect(described_class.parcel_source(build(:garden_map_setting, bundesland: "nw"))).to be_nil
+      expect(described_class.parcel_source(build(:garden_map_setting, bundesland: "custom"))).to be_nil
+    end
+  end
+
   describe ".client_config" do
     it "resolves a registry state" do
       setting = build(:garden_map_setting, bundesland: "ni")

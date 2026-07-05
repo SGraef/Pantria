@@ -6,6 +6,9 @@
 # {GardenMapSetting}; `update` is the admin-only settings form on that page.
 # Bed geometry itself is saved via GardenBedsController#geometry.
 class GardenMapsController < ApplicationController
+  # Zoom used after an address jump: close enough to see the parcel.
+  LOCATE_ZOOM = 18
+
   before_action :ensure_household
   before_action :set_settings
 
@@ -21,6 +24,39 @@ class GardenMapsController < ApplicationController
     else
       @garden_beds = current_household.garden_beds.includes(plantings: :plant).ordered
       render :show, status: :unprocessable_content
+    end
+  end
+
+  # Address -> saved viewport, via server-side geocoding (Nominatim). Admin
+  # like the rest of the settings; the geocoder is called at most once per
+  # form submit.
+  def locate
+    authorize @settings, :update?
+    result = Garden::Geocoder.search(params[:address])
+    if result
+      @settings.update(address: params[:address].to_s.strip.first(200),
+                       center_lat: result.lat, center_lng: result.lng,
+                       zoom: LOCATE_ZOOM)
+      redirect_to garden_map_path, notice: t("garden_map.locate.found", place: result.display_name)
+    else
+      redirect_to garden_map_path, alert: t("garden_map.locate.not_found")
+    end
+  end
+
+  # Point -> official parcel (Flurstück) outline + amtliche Fläche, proxied
+  # server-side (the state WFS endpoints publish no CORS headers). Read-only
+  # open data -> member-level like viewing the map.
+  def parcel
+    authorize @settings, :show?
+    source = Garden::MapSources.parcel_source(@settings)
+    head :unprocessable_content and return unless source
+
+    parcel = Garden::ParcelLookup.at(lat: params[:lat].to_f, lng: params[:lng].to_f, source: source)
+    if parcel
+      render json: { boundary: parcel.boundary, area_sqm: parcel.area_sqm,
+                     label: parcel.label, parcel_key: parcel.parcel_key }
+    else
+      head :not_found
     end
   end
 
