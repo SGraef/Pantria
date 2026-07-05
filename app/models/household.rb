@@ -56,6 +56,7 @@ class Household < ApplicationRecord
   has_many :projects, dependent: :destroy
   has_many :project_statuses, -> { ordered }, dependent: :destroy
   has_many :project_categories, -> { ordered }, dependent: :destroy
+  has_many :loans, dependent: :destroy
 
   after_create :seed_default_offer_categories
 

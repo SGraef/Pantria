@@ -248,6 +248,24 @@ ActiveRecord::Schema[8.0].define(version: 2026_07_06_100002) do
     t.index ["token_digest"], name: "index_invitations_on_token_digest", unique: true
   end
 
+  create_table "loans", charset: "utf8mb4", collation: "utf8mb4_unicode_ci", force: :cascade do |t|
+    t.bigint "household_id", null: false
+    t.string "item", null: false
+    t.string "counterparty", null: false
+    t.string "counterparty_key", null: false
+    t.string "direction", null: false
+    t.string "status", default: "outstanding", null: false
+    t.date "loaned_on"
+    t.date "due_on"
+    t.date "returned_on"
+    t.text "notes"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["household_id", "counterparty_key"], name: "index_loans_on_household_id_and_counterparty_key"
+    t.index ["household_id", "status"], name: "index_loans_on_household_id_and_status"
+    t.index ["household_id"], name: "index_loans_on_household_id"
+  end
+
   create_table "locations", charset: "utf8mb4", collation: "utf8mb4_0900_ai_ci", force: :cascade do |t|
     t.bigint "household_id", null: false
     t.string "name", null: false
@@ -952,6 +970,7 @@ ActiveRecord::Schema[8.0].define(version: 2026_07_06_100002) do
   add_foreign_key "inbound_email_sources", "users", on_delete: :cascade
   add_foreign_key "invitations", "households"
   add_foreign_key "invitations", "users", column: "invited_by_id"
+  add_foreign_key "loans", "households"
   add_foreign_key "locations", "households"
   add_foreign_key "meal_plan_entries", "households", on_delete: :cascade
   add_foreign_key "meal_plan_entries", "recipes", on_delete: :cascade

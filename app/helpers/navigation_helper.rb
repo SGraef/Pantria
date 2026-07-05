@@ -32,7 +32,8 @@ module NavigationHelper
         { label: t("nav.calendar"),  path: calendar_path,  icon: :calendar },
         { label: t("nav.documents"), path: documents_path, icon: :file },
         { label: t("nav.garden"),     path: plants_path,     icon: :sprout },
-        { label: t("nav.garden_map"), path: garden_map_path, icon: :map }
+        { label: t("nav.garden_map"), path: garden_map_path, icon: :map },
+        { label: t("nav.loans"),      path: loans_path,      icon: :swap }
       ] }
     ]
   end

@@ -145,6 +145,14 @@ Rails.application.routes.draw do
     resources :comments, only: %i[create destroy], controller: "project_discussion_comments"
   end
 
+  # Borrowed / lent item tracking (+ calendar-meeting reminders).
+  resources :loans, only: %i[index show new create edit update destroy] do
+    member do
+      post :mark_returned
+      post :reopen
+    end
+  end
+
   resources :todos do
     member do
       post   :transition # one-tap state change
