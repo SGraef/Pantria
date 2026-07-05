@@ -1,0 +1,48 @@
+<%# Locals: loan, url, method (:post for new, :patch for edit). %>
+<div class="card">
+  <%= form_with model: loan, url:, method:, multipart: true, local: true do |f| %>
+    <% if loan.errors.any? %>
+      <div class="flash alert"><%= loan.errors.full_messages.to_sentence %></div>
+    <% end %>
+
+    <p>
+      <%= f.label :direction, t("loan.field.direction") %><br>
+      <%= f.select :direction,
+                   Loan::DIRECTIONS.map { |d| [t("loan.directions.#{d}"), d] },
+                   selected: loan.direction %>
+    </p>
+    <p>
+      <%= f.label :item, t("loan.field.item") %><br>
+      <%= f.text_field :item, required: true, placeholder: t("loan.field.item_placeholder") %>
+    </p>
+    <p>
+      <%= f.label :counterparty, t("loan.field.counterparty") %><br>
+      <%= f.text_field :counterparty, required: true, placeholder: t("loan.field.counterparty_placeholder") %>
+    </p>
+    <p class="caption"><%= t("loan.field.counterparty_help") %></p>
+    <p>
+      <%= f.label :loaned_on, t("loan.field.loaned_on") %><br>
+      <%= f.date_field :loaned_on %>
+    </p>
+    <p>
+      <%= f.label :due_on, t("loan.field.due_on") %> <span class="caption"><%= t("common.optional") %></span><br>
+      <%= f.date_field :due_on %>
+    </p>
+    <p>
+      <%= f.label :notes, t("loan.field.notes") %><br>
+      <%= f.text_area :notes, rows: 2 %>
+    </p>
+    <p>
+      <%= f.label :photo, t("loan.field.photo") %> <span class="caption"><%= t("common.optional") %></span><br>
+      <% if loan.photo.attached? %>
+        <%= image_tag url_for(loan.photo.variant(resize_to_limit: [160, 160])),
+                      alt: loan.item, style: "display:block;margin-bottom:var(--sp-2);border-radius:var(--radius-md)" %>
+      <% end %>
+      <%= f.file_field :photo,
+                       accept: "image/jpeg,image/png,image/webp,image/heic,image/heif" %>
+    </p>
+    <p class="caption"><%= t("loan.field.photo_help") %></p>
+
+    <p><%= f.submit t("loan.save_button"), class: "btn" %></p>
+  <% end %>
+</div>

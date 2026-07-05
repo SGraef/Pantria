@@ -181,6 +181,10 @@ de:
     offer_match:
       title: "Beobachteter Artikel im Angebot"
       body: "%{title} — %{price} bei %{retailer}"
+    loan_reminder:
+      title: "Bald Treffen mit %{person}"
+      borrowed: "Du hast „%{item}“ von %{person} geliehen — denk ans Zurückgeben (Termin: %{event})."
+      lent: "Du hast „%{item}“ an %{person} verliehen — denk ans Zurückholen (Termin: %{event})."
 
   notification_preference:
     title: "Benachrichtigungen"
@@ -198,6 +202,7 @@ de:
       storage_expiring: "Lebensmittel läuft bald ab"
       storage_expired: "Gerade abgelaufene Lebensmittel"
       offer_match: "Beobachtete Artikel im Angebot"
+      loan_reminder: "Verliehenes/Geliehenes vor Treffen"
 
   push:
     enable: "Push-Benachrichtigungen aktivieren"
@@ -282,6 +287,7 @@ de:
     todos: "Aufgaben"
     calendar: "Kalender"
     documents: "Dokumente"
+    loans: "Verleih"
     notifications: "Benachrichtigungen"
     jobs: "Jobs"
     household: "Haushalt"
@@ -312,6 +318,48 @@ de:
     not_authorized: "Du bist nicht berechtigt, diese Aktion auszuführen."
     create_household_first: "Für diese Instanz ist noch kein Haushalt eingerichtet."
 
+  loan:
+    title: "Verleih"
+    intro: "Verliehene und geliehene Dinge im Blick. Steht ein Termin mit der Person im Kalender an, erinnert dich Homestead."
+    new_title: "Eintrag hinzufügen"
+    edit_title: "Eintrag bearbeiten"
+    add_borrowed: "Geliehen (von jemandem)"
+    add_lent: "Verliehen (an jemanden)"
+    save_button: "Speichern"
+    empty: "Noch nichts verliehen oder geliehen."
+    confirm_delete: "Diesen Eintrag wirklich löschen?"
+    mark_returned: "Zurückgegeben"
+    reopen: "Wieder offen"
+    directions:
+      borrowed: "geliehen"
+      lent: "verliehen"
+    direction_with_person:
+      borrowed: "von %{person}"
+      lent: "an %{person}"
+    statuses:
+      outstanding: "Offen"
+      returned: "Zurückgegeben"
+    filter:
+      outstanding: "Nur offen"
+      all: "Alle anzeigen"
+    table:
+      item: "Gegenstand"
+      person: "Person"
+      due: "Fällig"
+      status: "Status"
+    field:
+      direction: "Art"
+      item: "Gegenstand"
+      item_placeholder: "z. B. Bohrmaschine"
+      counterparty: "Person"
+      counterparty_placeholder: "z. B. Anna"
+      counterparty_help: "Der Name, wie er in deinen Kalenderterminen vorkommt — danach wird für die Erinnerung gesucht."
+      loaned_on: "Datum"
+      due_on: "Rückgabe bis"
+      notes: "Notiz"
+      photo: "Foto"
+      photo_help: "Ein Bild des Gegenstands – damit du weißt, um welches Objekt es geht."
+
   notices:
     product_saved:    "Produkt gespeichert."
     product_updated:  "Produkt aktualisiert."
@@ -337,6 +385,11 @@ de:
     grocery_added:    "Zur Einkaufsliste hinzugefügt."
     grocery_updated:  "Eintrag aktualisiert."
     grocery_removed:  "Entfernt."
+    loan_added:    "Eintrag gespeichert."
+    loan_updated:  "Eintrag aktualisiert."
+    loan_removed:  "Eintrag entfernt."
+    loan_returned: "Als zurückgegeben markiert."
+    loan_reopened: "Wieder als offen markiert."
     household_created:  "Haushalt erstellt."
     household_updated:  "Haushalt aktualisiert."
     cannot_demote_last_admin: "Der letzte verbleibende Admin kann nicht degradiert werden."

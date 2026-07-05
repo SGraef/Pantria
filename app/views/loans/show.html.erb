@@ -1,0 +1,68 @@
+<% content_for :title, @loan.item %>
+<h1><%= @loan.item %></h1>
+
+<p>
+  <%= link_to t("common.back"), loans_path, class: "btn btn-secondary" %>
+  <%= link_to t("common.edit"), edit_loan_path(@loan), class: "btn btn-secondary" %>
+</p>
+
+<div class="card">
+  <% if @loan.photo.attached? %>
+    <p>
+      <%= link_to rails_blob_path(@loan.photo, disposition: "inline"), target: "_blank", rel: "noopener" do %>
+        <%= image_tag url_for(@loan.photo.variant(resize_to_limit: [320, 320])),
+                      alt: @loan.item, style: "border-radius:var(--radius-lg)" %>
+      <% end %>
+    </p>
+  <% end %>
+
+  <dl>
+    <dt><%= t("loan.table.person") %></dt>
+    <dd>
+      <% tint = @loan.direction == "borrowed" ? "var(--warning-soft)" : "var(--success-soft)" %>
+      <span class="pill" style="background:<%= tint %>"><%= t("loan.directions.#{@loan.direction}") %></span>
+      <%= t("loan.direction_with_person.#{@loan.direction}", person: @loan.counterparty) %>
+    </dd>
+
+    <dt><%= t("loan.table.status") %></dt>
+    <dd>
+      <span class="pill <%= 'warn' if @loan.status == 'outstanding' %>">
+        <%= t("loan.statuses.#{@loan.status}") %>
+      </span>
+    </dd>
+
+    <% if @loan.loaned_on %>
+      <dt><%= t("loan.field.loaned_on") %></dt>
+      <dd><%= l(@loan.loaned_on) %></dd>
+    <% end %>
+
+    <% if @loan.due_on %>
+      <dt><%= t("loan.table.due") %></dt>
+      <dd><%= l(@loan.due_on) %></dd>
+    <% end %>
+
+    <% if @loan.returned_on %>
+      <dt><%= t("loan.statuses.returned") %></dt>
+      <dd><%= l(@loan.returned_on) %></dd>
+    <% end %>
+
+    <% if @loan.notes.present? %>
+      <dt><%= t("loan.field.notes") %></dt>
+      <dd><%= simple_format(@loan.notes) %></dd>
+    <% end %>
+  </dl>
+
+  <p>
+    <% if @loan.returned? %>
+      <%= button_to t("loan.reopen"), reopen_loan_path(@loan),
+                    class: "btn btn-secondary", form: { style: "display:inline" } %>
+    <% else %>
+      <%= button_to t("loan.mark_returned"), mark_returned_loan_path(@loan),
+                    class: "btn", form: { style: "display:inline" } %>
+    <% end %>
+  </p>
+</div>
+
+<hr>
+<%= button_to t("common.delete"), loan_path(@loan), method: :delete, class: "btn btn-danger",
+              data: { turbo_confirm: t("loan.confirm_delete") } %>

@@ -1,0 +1,71 @@
+<% content_for :title, t("loan.title") %>
+<h1><%= t("loan.title") %></h1>
+
+<p>
+  <%= link_to t("loan.add_borrowed"), new_loan_path(direction: "borrowed"), class: "btn" %>
+  <%= link_to t("loan.add_lent"), new_loan_path(direction: "lent"), class: "btn" %>
+</p>
+<p class="caption"><%= t("loan.intro") %></p>
+
+<div style="display:flex;flex-wrap:wrap;gap:var(--sp-2);align-items:center;margin-bottom:var(--sp-3)">
+  <%= link_to t("loan.filter.outstanding"), loans_path,
+              class: ("chip #{'chip-active' unless @show_returned}").strip %>
+  <%= link_to t("loan.filter.all"), loans_path(show_returned: 1),
+              class: ("chip #{'chip-active' if @show_returned}").strip %>
+</div>
+
+<% if @loans.any? %>
+  <table>
+    <thead>
+      <tr>
+        <th><%= t("loan.table.item") %></th>
+        <th><%= t("loan.table.person") %></th>
+        <th><%= t("loan.table.due") %></th>
+        <th><%= t("loan.table.status") %></th>
+        <th></th>
+      </tr>
+    </thead>
+    <tbody>
+      <% @loans.each do |loan| %>
+        <% tint = loan.direction == "borrowed" ? "var(--warning-soft)" : "var(--success-soft)" %>
+        <tr>
+          <td>
+            <% if loan.photo.attached? %>
+              <%= link_to rails_blob_path(loan.photo, disposition: "inline"), target: "_blank", rel: "noopener" do %>
+                <%= image_tag url_for(loan.photo.variant(resize_to_fill: [36, 36])),
+                              alt: loan.item,
+                              style: "width:36px;height:36px;object-fit:cover;border-radius:var(--radius-sm);vertical-align:middle;margin-right:var(--sp-2)" %>
+              <% end %>
+            <% end %>
+            <%= link_to loan.item, loan_path(loan) %>
+          </td>
+          <td>
+            <span class="pill" style="background:<%= tint %>"><%= t("loan.directions.#{loan.direction}") %></span>
+            <%= t("loan.direction_with_person.#{loan.direction}", person: loan.counterparty) %>
+          </td>
+          <td><%= l(loan.due_on) if loan.due_on %></td>
+          <td>
+            <span class="pill <%= 'warn' if loan.status == 'outstanding' %>">
+              <%= t("loan.statuses.#{loan.status}") %>
+            </span>
+          </td>
+          <td style="white-space:nowrap">
+            <% if loan.returned? %>
+              <%= button_to t("loan.reopen"), reopen_loan_path(loan),
+                            class: "btn btn-sm btn-secondary", form: { style: "display:inline" } %>
+            <% else %>
+              <%= button_to t("loan.mark_returned"), mark_returned_loan_path(loan),
+                            class: "btn btn-sm", form: { style: "display:inline" } %>
+            <% end %>
+            <%= link_to t("common.edit"), edit_loan_path(loan), class: "btn btn-sm btn-secondary" %>
+            <%= button_to t("common.delete"), loan_path(loan), method: :delete,
+                          class: "btn btn-sm btn-danger",
+                          data: { turbo_confirm: t("loan.confirm_delete") }, form: { style: "display:inline" } %>
+          </td>
+        </tr>
+      <% end %>
+    </tbody>
+  </table>
+<% else %>
+  <p><%= t("loan.empty") %></p>
+<% end %>

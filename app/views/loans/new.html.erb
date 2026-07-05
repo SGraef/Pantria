@@ -1,0 +1,4 @@
+<% content_for :title, t("loan.new_title") %>
+<h1><%= t("loan.new_title") %></h1>
+
+<%= render "form", loan: @loan, url: loans_path, method: :post %>

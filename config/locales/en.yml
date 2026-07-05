@@ -175,6 +175,10 @@ en:
     offer_match:
       title: "Watched item on offer"
       body: "%{title} — %{price} at %{retailer}"
+    loan_reminder:
+      title: "Meeting %{person} soon"
+      borrowed: "You borrowed “%{item}” from %{person} — remember to return it (event: %{event})."
+      lent: "You lent “%{item}” to %{person} — remember to collect it (event: %{event})."
 
   notification_preference:
     title: "Notification settings"
@@ -192,6 +196,7 @@ en:
       storage_expiring: "Food expiring soon"
       storage_expired: "Food that just expired"
       offer_match: "Watched items on offer"
+      loan_reminder: "Lent/borrowed items before a meeting"
 
   push:
     enable: "Enable push notifications"
@@ -276,6 +281,7 @@ en:
     todos: "Todos"
     calendar: "Calendar"
     documents: "Documents"
+    loans: "Lending"
     notifications: "Notifications"
     jobs: "Jobs"
     household: "Household"
@@ -306,6 +312,48 @@ en:
     not_authorized: "You are not authorized to perform this action."
     create_household_first: "No household is set up on this instance yet."
 
+  loan:
+    title: "Lending"
+    intro: "Keep track of things you lent out and things you borrowed. When a meeting with that person is on your calendar, Homestead reminds you."
+    new_title: "Add entry"
+    edit_title: "Edit entry"
+    add_borrowed: "Borrowed (from someone)"
+    add_lent: "Lent (to someone)"
+    save_button: "Save"
+    empty: "Nothing lent or borrowed yet."
+    confirm_delete: "Really delete this entry?"
+    mark_returned: "Returned"
+    reopen: "Reopen"
+    directions:
+      borrowed: "borrowed"
+      lent: "lent"
+    direction_with_person:
+      borrowed: "from %{person}"
+      lent: "to %{person}"
+    statuses:
+      outstanding: "Open"
+      returned: "Returned"
+    filter:
+      outstanding: "Open only"
+      all: "Show all"
+    table:
+      item: "Item"
+      person: "Person"
+      due: "Due"
+      status: "Status"
+    field:
+      direction: "Type"
+      item: "Item"
+      item_placeholder: "e.g. power drill"
+      counterparty: "Person"
+      counterparty_placeholder: "e.g. Anna"
+      counterparty_help: "The name as it appears in your calendar events — that's what the reminder matches against."
+      loaned_on: "Date"
+      due_on: "Return by"
+      notes: "Note"
+      photo: "Photo"
+      photo_help: "A picture of the item — so you know which object this is."
+
   notices:
     product_saved:    "Product saved."
     product_updated:  "Product updated."
@@ -331,6 +379,11 @@ en:
     grocery_added:    "Added to grocery list."
     grocery_updated:  "Grocery item updated."
     grocery_removed:  "Removed."
+    loan_added:    "Entry saved."
+    loan_updated:  "Entry updated."
+    loan_removed:  "Entry removed."
+    loan_returned: "Marked as returned."
+    loan_reopened: "Marked as open again."
     household_created:  "Household created."
     household_updated:  "Household updated."
     cannot_demote_last_admin: "Can't demote the only remaining admin."
