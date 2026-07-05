@@ -1,0 +1,38 @@
+<%# Locals: project. %>
+<%= form_with model: project, local: true do |f| %>
+  <% if project.errors.any? %>
+    <div class="flash alert"><%= project.errors.full_messages.to_sentence %></div>
+  <% end %>
+
+  <p>
+    <%= f.label :name, t("project.form.name") %><br>
+    <%= f.text_field :name, required: true, style: "width:100%",
+                     placeholder: t("project.form.name_placeholder") %>
+  </p>
+  <p>
+    <%= f.label :description, t("project.form.description") %><br>
+    <%= f.text_area :description, rows: 4, style: "width:100%" %>
+  </p>
+  <p>
+    <%= f.label :project_status_id, t("project.form.status") %><br>
+    <%= f.collection_select :project_status_id, project.household.project_statuses.ordered, :id, :name %>
+  </p>
+  <p>
+    <%= f.label :project_category_id, t("project.form.category") %><br>
+    <%= f.collection_select :project_category_id, project.household.project_categories.ordered, :id, :name,
+                            include_blank: t("project.form.no_category") %>
+  </p>
+  <p>
+    <%= f.label :parent_id, t("project.form.parent") %><br>
+    <%= f.collection_select :parent_id, parent_project_options(project), :id, :name,
+                            include_blank: t("project.form.no_parent") %>
+  </p>
+  <p class="caption"><%= t("project.form.parent_help") %></p>
+  <p>
+    <%= f.label :budget, t("project.form.budget") %><br>
+    <%= f.number_field :budget, step: 0.01, min: 0, inputmode: "decimal" %>
+  </p>
+  <p class="caption"><%= t("project.form.budget_help") %></p>
+
+  <p><%= f.submit t("common.save"), class: "btn" %></p>
+<% end %>

@@ -94,6 +94,57 @@ Rails.application.routes.draw do
     member { post :test }
   end
 
+  # Garden planning: plant catalog (Perenual-backed) + planner.
+  resources :plants, only: %i[index show destroy] do
+    collection { get :search }
+    collection { post :import }
+  end
+
+  # Optional Perenual API binding (admin-only). Singular: one per household.
+  resource :garden_connection, only: %i[new create show update destroy]
+
+  # Garden beds + the plantings that live in them.
+  resources :garden_beds do
+    member { patch :geometry } # JSON save from the map / lite planner
+  end
+  resources :plantings, only: %i[create update destroy] do
+    member { post :advance }
+  end
+
+  # Visual garden overview (Leaflet over official WMS layers, or the lite
+  # planner). Singular: one map per household; update = admin settings form.
+  # locate: address -> viewport (server-side geocoding, admin).
+  # parcel: point -> official Flurstück outline + area (server-side WFS proxy).
+  resource :garden_map, only: %i[show update] do
+    post  :locate
+    get   :parcel
+    patch :property # save/clear the Grundstück outline (traced or adopted)
+  end
+
+  # Project planning: user-defined statuses (= kanban columns) and
+  # categories, then the projects themselves. The settings routes use
+  # path "projects/..." and MUST stay above `resources :projects`, or
+  # GET /projects/statuses would match projects#show with id "statuses".
+  resources :project_statuses, only: %i[index create update destroy], path: "projects/statuses" do
+    post :reset_defaults, on: :collection
+  end
+  resources :project_categories, only: %i[index create update destroy], path: "projects/categories"
+  resources :projects do
+    member { patch :move } # kanban drag + no-JS fallback
+    resources :relations, only: %i[create destroy], controller: "project_relations"
+    resources :items, only: %i[create update destroy], controller: "project_items"
+    resources :discussions, only: %i[create destroy], controller: "project_discussions" do
+      member do
+        post :resolve
+        post :reopen
+      end
+    end
+  end
+  # Comments sit flat under discussions to respect the two-level nesting cap.
+  resources :project_discussions, only: [] do
+    resources :comments, only: %i[create destroy], controller: "project_discussion_comments"
+  end
+
   # Borrowed / lent item tracking (+ calendar-meeting reminders).
   resources :loans, only: %i[index show new create edit update destroy] do
     member do

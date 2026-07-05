@@ -1,0 +1,46 @@
+<%# Locals: project. Board metrics come from ProjectsController#load_board:
+    @costs, @open_todo_counts, @open_discussion_counts, @blocked_ids,
+    @children_counts. %>
+<article id="<%= dom_id(project) %>" class="card board-card"
+         data-project-id="<%= project.id %>"
+         data-move-url="<%= move_project_path(project) %>">
+  <div class="board-card__head">
+    <span class="board-card__grip" data-action="pointerdown->board#dragStart" aria-hidden="true">⠿</span>
+    <%= link_to project.name, project_path(project), class: "board-card__title" %>
+  </div>
+
+  <p class="board-card__meta">
+    <% if project.project_category %>
+      <%= color_chip(project.project_category.name, project.project_category.color) %>
+    <% end %>
+    <% if (kids = @children_counts[project.id]) %>
+      <span class="caption"><%= t("project.card.subprojects", count: kids) %></span>
+    <% end %>
+  </p>
+
+  <p class="board-card__meta">
+    <% actual = @costs.fetch(project.id, 0) %>
+    <% if actual.positive? || project.budget_cents %>
+      <span class="<%= project.over_budget?(actual) ? "pill danger" : "caption" %>">
+        <%= project_money(actual) %><% if project.budget_cents %> / <%= project_money(project.budget_cents) %><% end %>
+      </span>
+    <% end %>
+    <% if @blocked_ids.include?(project.id) %>
+      <span class="pill danger"><%= t("project.card.blocked") %></span>
+    <% end %>
+    <% if (todos = @open_todo_counts[project.id]) %>
+      <span class="pill"><%= t("project.card.open_todos", count: todos) %></span>
+    <% end %>
+    <% if (discussions = @open_discussion_counts[project.id]) %>
+      <span class="pill warn"><%= t("project.card.open_discussions", count: discussions) %></span>
+    <% end %>
+  </p>
+
+  <%# No-JS fallback: plain status-move form, hidden once board JS connects. %>
+  <%= form_with url: move_project_path(project), method: :patch, local: true,
+                class: "board-card__fallback" do |f| %>
+    <%= select_tag "project[project_status_id]",
+                   options_from_collection_for_select(@statuses, :id, :name, project.project_status_id) %>
+    <%= f.submit t("project.board.move"), class: "btn btn-sm secondary" %>
+  <% end %>
+</article>

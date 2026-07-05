@@ -1,0 +1,66 @@
+<% content_for :title, @plant.common_name %>
+<h1><%= @plant.common_name %></h1>
+<% if @plant.scientific_name.present? %><p class="caption"><em><%= @plant.scientific_name %></em></p><% end %>
+
+<p>
+  <%= link_to t("common.back"), plants_path, class: "btn btn-secondary" %>
+  <% if @plant.external_url.present? %>
+    <%= link_to t("plant.open_external"), @plant.external_url, target: "_blank", rel: "noopener", class: "btn btn-secondary" %>
+  <% end %>
+</p>
+
+<div class="card">
+  <% if @plant.image_url.present? %>
+    <p><%= image_tag @plant.image_url, alt: @plant.common_name, loading: "lazy",
+                     style: "max-height:240px;border-radius:var(--radius-lg)" %></p>
+  <% end %>
+  <dl>
+    <dt><%= t("plant.table.sow") %></dt>
+    <dd><%= garden_month_range(@plant.sow_from_month, @plant.sow_to_month) %></dd>
+
+    <dt><%= t("plant.table.harvest") %></dt>
+    <dd><%= garden_month_range(@plant.harvest_from_month, @plant.harvest_to_month) %></dd>
+
+    <% if @plant.cycle.present? %>
+      <dt><%= t("plant.field.cycle") %></dt>
+      <dd><%= t("plant.cycles.#{@plant.cycle}", default: @plant.cycle) %></dd>
+    <% end %>
+    <% if @plant.sunlight.present? %>
+      <dt><%= t("plant.field.sunlight") %></dt>
+      <dd><%= t("plant.sunlights.#{@plant.sunlight}", default: @plant.sunlight.to_s.humanize) %></dd>
+    <% end %>
+    <% if @plant.watering.present? %>
+      <dt><%= t("plant.field.watering") %></dt>
+      <dd><%= t("plant.waterings.#{@plant.watering}", default: @plant.watering) %></dd>
+    <% end %>
+    <% if @plant.hardiness_min.present? %>
+      <dt><%= t("plant.field.hardiness") %></dt>
+      <dd><%= [@plant.hardiness_min, @plant.hardiness_max].compact.uniq.join("–") %></dd>
+    <% end %>
+    <dt><%= t("plant.field.edible") %></dt>
+    <dd><%= @plant.edible ? t("plant.edible") : t("common.none") %></dd>
+  </dl>
+</div>
+
+<% companions = @plant.companions %>
+<% if companions[:good].any? || companions[:bad].any? %>
+  <div class="card">
+    <h2><%= t("plant.companions_heading") %></h2>
+    <% if companions[:good].any? %>
+      <p>
+        <strong><%= t("plant.companions_good") %>:</strong>
+        <% companions[:good].each do |k| %><span class="pill" style="background:var(--success-soft)"><%= garden_crop_label(k) %></span> <% end %>
+      </p>
+    <% end %>
+    <% if companions[:bad].any? %>
+      <p>
+        <strong><%= t("plant.companions_bad") %>:</strong>
+        <% companions[:bad].each do |k| %><span class="pill" style="background:var(--warning-soft)"><%= garden_crop_label(k) %></span> <% end %>
+      </p>
+    <% end %>
+  </div>
+<% end %>
+
+<hr>
+<%= button_to t("common.delete"), plant_path(@plant), method: :delete, class: "btn btn-danger",
+              data: { turbo_confirm: t("plant.confirm_delete") } %>

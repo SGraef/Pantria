@@ -1,0 +1,19 @@
+<% content_for :title, t("project.title") %>
+<h1><%= t("project.title") %></h1>
+
+<p style="display:flex;gap:var(--sp-2);flex-wrap:wrap">
+  <%= link_to t("project.board.new"), new_project_path, class: "btn" %>
+  <%= link_to t("project.statuses.title"), project_statuses_path, class: "btn btn-sm btn-secondary" %>
+  <%= link_to t("project.categories.title"), project_categories_path, class: "btn btn-sm btn-secondary" %>
+</p>
+<p class="caption"><%= t("project.board.intro") %></p>
+
+<% if @projects.empty? %>
+  <p><%= t("project.board.empty") %></p>
+<% end %>
+
+<div class="project-board" data-controller="board" data-board-token-value="<%= form_authenticity_token %>">
+  <% @statuses.each do |status| %>
+    <%= render "column", status: status %>
+  <% end %>
+</div>

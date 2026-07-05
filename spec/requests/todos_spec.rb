@@ -26,6 +26,18 @@ RSpec.describe "Todos" do
       expect(todo.creator).to eq(admin)
       expect(todo.status).to eq("open")
     end
+
+    it "attaches a todo to a project of the household" do
+      project = create(:project, household: household)
+      post todos_path, params: { todo: { title: "Bretter kaufen", project_id: project.id } }
+      expect(Todo.last.project).to eq(project)
+    end
+
+    it "rejects a project from another household" do
+      foreign = create(:project, household: create(:household))
+      post todos_path, params: { todo: { title: "X", project_id: foreign.id } }
+      expect(response).to have_http_status(:unprocessable_content)
+    end
   end
 
   describe "POST /todos/:id/transition" do

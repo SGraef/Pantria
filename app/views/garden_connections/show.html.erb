@@ -1,0 +1,29 @@
+<% content_for :title, t("garden_connection.title") %>
+<h1><%= t("garden_connection.title") %></h1>
+<p><%= link_to t("common.back"), plants_path, class: "btn btn-secondary" %></p>
+
+<div class="card">
+  <dl>
+    <dt><%= t("garden_connection.status") %></dt>
+    <dd>
+      <span class="pill <%= @connection.connected? ? '' : 'warn' %>">
+        <%= @connection.connected? ? t("garden_connection.connected") : t("garden_connection.incomplete") %>
+      </span>
+    </dd>
+    <dt><%= t("garden_connection.hardiness_zone") %></dt>
+    <dd><%= @connection.effective_zone %></dd>
+    <% if @connection.region.present? %>
+      <dt><%= t("garden_connection.region") %></dt>
+      <dd><%= @connection.region %></dd>
+    <% end %>
+  </dl>
+</div>
+
+<div class="card">
+  <h2><%= t("garden_connection.edit_heading") %></h2>
+  <%= render "form", connection: @connection, url: garden_connection_path, method: :patch %>
+</div>
+
+<hr>
+<%= button_to t("garden_connection.disconnect"), garden_connection_path, method: :delete, class: "btn btn-danger",
+              data: { turbo_confirm: t("garden_connection.confirm_disconnect") } %>

@@ -1,0 +1,26 @@
+# Curated companion-planting table, keyed by the crop `key` from
+# sowing_calendar.yml. `good` = plants that grow well nearby; `bad` = pairings
+# to avoid. Relationships are meant to be symmetric, but Garden::Catalog only
+# reads what's listed here (it does not infer the reverse), so keep both sides
+# in sync when editing.
+crops:
+  tomato:   { good: [basil, carrot, onion, parsley, lettuce], bad: [potato, pea, fennel] }
+  potato:   { good: [bean, pea, cabbage, spinach],            bad: [tomato, pumpkin, cucumber] }
+  carrot:   { good: [onion, pea, lettuce, radish, tomato],    bad: [] }
+  lettuce:  { good: [carrot, radish, cucumber, strawberry],   bad: [] }
+  radish:   { good: [carrot, lettuce, pea, spinach],          bad: [] }
+  bean:     { good: [carrot, cucumber, potato, radish],       bad: [onion, garlic, pea] }
+  pea:      { good: [carrot, radish, cucumber, bean],         bad: [onion, garlic, potato, tomato] }
+  cucumber: { good: [bean, lettuce, pea, radish],             bad: [potato, tomato] }
+  zucchini: { good: [bean, onion, basil],                     bad: [potato, cucumber] }
+  pumpkin:  { good: [bean, onion],                            bad: [potato] }
+  onion:    { good: [carrot, beetroot, lettuce, strawberry],  bad: [bean, pea] }
+  garlic:   { good: [carrot, tomato, strawberry],             bad: [bean, pea] }
+  basil:    { good: [tomato, pepper],                         bad: [] }
+  parsley:  { good: [tomato, onion],                          bad: [lettuce] }
+  spinach:  { good: [strawberry, bean, radish],               bad: [] }
+  beetroot: { good: [onion, kale, lettuce],                   bad: [] }
+  kale:     { good: [bean, beetroot, potato],                 bad: [tomato] }
+  pepper:   { good: [basil, onion, carrot],                   bad: [bean] }
+  strawberry: { good: [lettuce, spinach, onion, garlic],      bad: [cabbage] }
+  chard:    { good: [bean, onion],                            bad: [] }

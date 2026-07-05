@@ -1,0 +1,70 @@
+<% content_for :title, t("project.statuses.title") %>
+<h1><%= t("project.statuses.title") %></h1>
+<p class="caption"><%= t("project.statuses.intro") %></p>
+
+<p style="display:flex;gap:var(--sp-2);flex-wrap:wrap">
+  <%= link_to t("project.statuses.back"), projects_path, class: "btn btn-sm secondary" %>
+  <%= link_to t("project.categories.title"), project_categories_path, class: "btn btn-sm secondary" %>
+  <%= button_to t("project.statuses.reset_defaults"),
+                reset_defaults_project_statuses_path, method: :post,
+                class: "btn btn-sm warn",
+                data: { turbo_confirm: t("project.statuses.reset_confirm") } %>
+</p>
+
+<%# One card per status. Position orders the kanban columns (lower = left);
+    the number input reorders without drag-and-drop. %>
+<% @statuses.each do |status| %>
+  <div class="card" style="margin-bottom:var(--sp-3)">
+    <p style="margin:0 0 var(--sp-2)"><%= color_chip(status.name, status.color) %></p>
+    <%= form_with model: status, url: project_status_path(status), method: :patch, local: true,
+                  html: { style: "display:flex;gap:var(--sp-2);align-items:flex-end;flex-wrap:wrap" } do |f| %>
+      <span style="flex:1 1 14rem">
+        <%= f.label :name, t("project.statuses.label_name") %><br>
+        <%= f.text_field :name, required: true, style: "width:100%" %>
+      </span>
+      <span style="flex:0 0 6rem">
+        <%= f.label :position, t("project.statuses.label_position") %><br>
+        <%= f.number_field :position, step: 1, style: "width:100%" %>
+      </span>
+      <span style="flex:0 0 9rem">
+        <%= f.label :color, t("project.statuses.label_color") %><br>
+        <%= f.select :color, project_color_options, {}, style: "width:100%" %>
+      </span>
+      <label style="display:flex;align-items:center;gap:var(--sp-1);padding-bottom:.4rem">
+        <%= f.check_box :done %> <%= t("project.statuses.label_done") %>
+      </label>
+      <%= f.submit t("common.save"), class: "btn btn-sm" %>
+    <% end %>
+    <p class="caption" style="margin:var(--sp-1) 0 0"><%= t("project.statuses.done_help") %></p>
+    <p style="margin-top:var(--sp-2)">
+      <%= button_to t("project.statuses.remove"),
+                    project_status_path(status), method: :delete,
+                    class: "btn btn-sm warn",
+                    data: { turbo_confirm: t("project.statuses.remove_confirm", name: status.name) },
+                    form: { style: "display:inline" } %>
+    </p>
+  </div>
+<% end %>
+
+<h2><%= t("project.statuses.add") %></h2>
+<div class="card">
+  <%= form_with model: @new_status, url: project_statuses_path, local: true,
+                html: { style: "display:flex;gap:var(--sp-2);flex-wrap:wrap;align-items:flex-end" } do |f| %>
+    <span style="flex:1 1 14rem">
+      <%= f.label :name, t("project.statuses.label_name") %><br>
+      <%= f.text_field :name, required: true, placeholder: t("project.statuses.name_placeholder"), style: "width:100%" %>
+    </span>
+    <span style="flex:0 0 6rem">
+      <%= f.label :position, t("project.statuses.label_position") %><br>
+      <%= f.number_field :position, step: 1, style: "width:100%" %>
+    </span>
+    <span style="flex:0 0 9rem">
+      <%= f.label :color, t("project.statuses.label_color") %><br>
+      <%= f.select :color, project_color_options, {}, style: "width:100%" %>
+    </span>
+    <label style="display:flex;align-items:center;gap:var(--sp-1);padding-bottom:.4rem">
+      <%= f.check_box :done %> <%= t("project.statuses.label_done") %>
+    </label>
+    <%= f.submit t("project.statuses.create_button"), class: "btn btn-sm" %>
+  <% end %>
+</div>

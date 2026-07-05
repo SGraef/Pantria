@@ -1,0 +1,53 @@
+<%# Locals: settings. Admin-only (caller checks the policy). The hidden
+    viewport fields are kept fresh by garden_map_controller on every map
+    move, so saving the form also saves "where the map was". %>
+<h2><%= t("garden_map.settings.heading") %></h2>
+
+<%# Address jump: separate form (posts to locate), geocoded server-side. %>
+<%= form_with url: locate_garden_map_path, method: :post, local: true do %>
+  <p>
+    <%= label_tag :address, t("garden_map.locate.label") %><br>
+    <%= text_field_tag :address, settings.address, placeholder: t("garden_map.locate.placeholder"), maxlength: 200 %>
+    <%= submit_tag t("garden_map.locate.button"), class: "btn btn-secondary btn-sm" %>
+  </p>
+  <p class="caption"><%= t("garden_map.locate.help") %></p>
+<% end %>
+<%= form_with model: settings, url: garden_map_path, method: :patch, local: true do |f| %>
+  <% if settings.errors.any? %>
+    <div class="flash alert"><%= settings.errors.full_messages.to_sentence %></div>
+  <% end %>
+
+  <p>
+    <%= f.label :mode, t("garden_map.settings.mode") %><br>
+    <%= f.select :mode, GardenMapSetting::MODES.map { |m| [t("garden_map.settings.mode_#{m}"), m] } %>
+  </p>
+  <p class="caption"><%= t("garden_map.settings.mode_help") %></p>
+
+  <p>
+    <%= f.label :bundesland, t("garden_map.settings.bundesland") %><br>
+    <%= f.select :bundesland, Garden::MapSources.options_for_select %>
+  </p>
+  <p class="caption"><%= t("garden_map.settings.bundesland_help") %></p>
+
+  <fieldset class="garden-map-custom-wms">
+    <legend class="caption"><%= t("garden_map.settings.custom_heading") %></legend>
+    <p>
+      <%= f.label :custom_dop_url, t("garden_map.settings.custom_dop_url") %><br>
+      <%= f.url_field :custom_dop_url, placeholder: "https://…/dop_wms" %>
+      <%= f.label :custom_dop_layer, t("garden_map.settings.custom_dop_layer") %><br>
+      <%= f.text_field :custom_dop_layer %>
+    </p>
+    <p>
+      <%= f.label :custom_alkis_url, t("garden_map.settings.custom_alkis_url") %><br>
+      <%= f.url_field :custom_alkis_url, placeholder: "https://…/alkis_wms" %>
+      <%= f.label :custom_alkis_layer, t("garden_map.settings.custom_alkis_layer") %><br>
+      <%= f.text_field :custom_alkis_layer %>
+    </p>
+  </fieldset>
+
+  <%= f.hidden_field :center_lat, data: { garden_map_target: "centerLat" } %>
+  <%= f.hidden_field :center_lng, data: { garden_map_target: "centerLng" } %>
+  <%= f.hidden_field :zoom,       data: { garden_map_target: "zoom" } %>
+
+  <p><%= f.submit t("garden_map.settings.save"), class: "btn" %></p>
+<% end %>

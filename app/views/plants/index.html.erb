@@ -1,0 +1,56 @@
+<% content_for :title, t("plant.title") %>
+<h1><%= t("plant.title") %></h1>
+<p><%= link_to t("plant.planner_link"), garden_beds_path, class: "btn btn-secondary" %></p>
+<p class="caption"><%= t("plant.intro") %></p>
+
+<div class="card">
+  <%= form_with url: search_plants_path, method: :get, local: true do %>
+    <p>
+      <%= label_tag :q, t("plant.search_label") %><br>
+      <%= text_field_tag :q, params[:q], placeholder: t("plant.search_placeholder") %>
+      <%= submit_tag t("plant.search_button"), class: "btn" %>
+    </p>
+  <% end %>
+  <% if @connection&.connected? %>
+    <p class="caption"><%= t("plant.connected_hint") %></p>
+  <% else %>
+    <p class="caption">
+      <%= t("plant.not_connected_hint") %>
+      <%= link_to t("plant.connect_link"), garden_connection_path %>
+    </p>
+  <% end %>
+</div>
+
+<% if @plants.any? %>
+  <table>
+    <thead>
+      <tr>
+        <th><%= t("plant.table.name") %></th>
+        <th><%= t("plant.table.sow") %></th>
+        <th><%= t("plant.table.harvest") %></th>
+        <th></th>
+      </tr>
+    </thead>
+    <tbody>
+      <% @plants.each do |plant| %>
+        <tr>
+          <td>
+            <% if plant.image_url.present? %>
+              <%= image_tag plant.image_url, alt: plant.common_name, loading: "lazy",
+                            style: "width:36px;height:36px;object-fit:cover;border-radius:var(--radius-sm);vertical-align:middle;margin-right:var(--sp-2)" %>
+            <% end %>
+            <%= link_to plant.common_name, plant_path(plant) %>
+            <% if plant.edible %><span class="pill" style="background:var(--success-soft)"><%= t("plant.edible") %></span><% end %>
+          </td>
+          <td><%= garden_month_range(plant.sow_from_month, plant.sow_to_month) %></td>
+          <td><%= garden_month_range(plant.harvest_from_month, plant.harvest_to_month) %></td>
+          <td style="white-space:nowrap">
+            <%= link_to t("common.open"), plant_path(plant), class: "btn btn-sm btn-secondary" %>
+          </td>
+        </tr>
+      <% end %>
+    </tbody>
+  </table>
+<% else %>
+  <p><%= t("plant.empty") %></p>
+<% end %>

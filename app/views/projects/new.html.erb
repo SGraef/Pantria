@@ -1,0 +1,6 @@
+<% content_for :title, t("project.new_title") %>
+<h1><%= t("project.new_title") %></h1>
+<p><%= link_to t("common.back"), projects_path, class: "btn btn-secondary" %></p>
+<div class="card">
+  <%= render "form", project: @project %>
+</div>

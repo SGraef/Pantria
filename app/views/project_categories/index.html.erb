@@ -1,0 +1,57 @@
+<% content_for :title, t("project.categories.title") %>
+<h1><%= t("project.categories.title") %></h1>
+<p class="caption"><%= t("project.categories.intro") %></p>
+
+<p style="display:flex;gap:var(--sp-2);flex-wrap:wrap">
+  <%= link_to t("project.statuses.back"), projects_path, class: "btn btn-sm secondary" %>
+  <%= link_to t("project.statuses.title"), project_statuses_path, class: "btn btn-sm secondary" %>
+</p>
+
+<% @categories.each do |category| %>
+  <div class="card" style="margin-bottom:var(--sp-3)">
+    <p style="margin:0 0 var(--sp-2)"><%= color_chip(category.name, category.color) %></p>
+    <%= form_with model: category, url: project_category_path(category), method: :patch, local: true,
+                  html: { style: "display:flex;gap:var(--sp-2);align-items:flex-end;flex-wrap:wrap" } do |f| %>
+      <span style="flex:1 1 14rem">
+        <%= f.label :name, t("project.categories.label_name") %><br>
+        <%= f.text_field :name, required: true, style: "width:100%" %>
+      </span>
+      <span style="flex:0 0 6rem">
+        <%= f.label :position, t("project.categories.label_position") %><br>
+        <%= f.number_field :position, step: 1, style: "width:100%" %>
+      </span>
+      <span style="flex:0 0 9rem">
+        <%= f.label :color, t("project.categories.label_color") %><br>
+        <%= f.select :color, project_color_options, {}, style: "width:100%" %>
+      </span>
+      <%= f.submit t("common.save"), class: "btn btn-sm" %>
+    <% end %>
+    <p style="margin-top:var(--sp-2)">
+      <%= button_to t("project.categories.remove"),
+                    project_category_path(category), method: :delete,
+                    class: "btn btn-sm warn",
+                    data: { turbo_confirm: t("project.categories.remove_confirm", name: category.name) },
+                    form: { style: "display:inline" } %>
+    </p>
+  </div>
+<% end %>
+
+<h2><%= t("project.categories.add") %></h2>
+<div class="card">
+  <%= form_with model: @new_category, url: project_categories_path, local: true,
+                html: { style: "display:flex;gap:var(--sp-2);flex-wrap:wrap;align-items:flex-end" } do |f| %>
+    <span style="flex:1 1 14rem">
+      <%= f.label :name, t("project.categories.label_name") %><br>
+      <%= f.text_field :name, required: true, placeholder: t("project.categories.name_placeholder"), style: "width:100%" %>
+    </span>
+    <span style="flex:0 0 6rem">
+      <%= f.label :position, t("project.categories.label_position") %><br>
+      <%= f.number_field :position, step: 1, style: "width:100%" %>
+    </span>
+    <span style="flex:0 0 9rem">
+      <%= f.label :color, t("project.categories.label_color") %><br>
+      <%= f.select :color, project_color_options, {}, style: "width:100%" %>
+    </span>
+    <%= f.submit t("project.categories.create_button"), class: "btn btn-sm" %>
+  <% end %>
+</div>

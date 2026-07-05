@@ -1,0 +1,29 @@
+<%# Locals: bed, url, method (:post for new, :patch for edit). %>
+<div class="card">
+  <%= form_with model: bed, url:, method:, local: true do |f| %>
+    <% if bed.errors.any? %>
+      <div class="flash alert"><%= bed.errors.full_messages.to_sentence %></div>
+    <% end %>
+
+    <p>
+      <%= f.label :name, t("garden_bed.field.name") %><br>
+      <%= f.text_field :name, required: true, placeholder: t("garden_bed.field.name_placeholder") %>
+    </p>
+    <p>
+      <%= f.label :location, t("garden_bed.field.location") %><br>
+      <%= f.text_field :location, placeholder: t("garden_bed.field.location_placeholder") %>
+    </p>
+    <p>
+      <%= f.label :sun_exposure, t("garden_bed.field.sun_exposure") %><br>
+      <%= f.select :sun_exposure,
+                   GardenBed::SUN_EXPOSURES.map { |s| [t("garden_bed.sun.#{s}"), s] },
+                   include_blank: t("common.none") %>
+    </p>
+    <p>
+      <%= f.label :notes, t("garden_bed.field.notes") %><br>
+      <%= f.text_area :notes, rows: 2 %>
+    </p>
+
+    <p><%= f.submit t("garden_bed.save_button"), class: "btn" %></p>
+  <% end %>
+</div>

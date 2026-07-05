@@ -1,0 +1,93 @@
+<% content_for :title, @bed.name %>
+<h1><%= @bed.name %></h1>
+<p class="caption">
+  <% if @bed.location.present? %><%= @bed.location %> · <% end %>
+  <% if @bed.sun_exposure.present? %><%= t("garden_bed.sun.#{@bed.sun_exposure}") %> · <% end %>
+  <% if @bed.area_sqm.present? %><%= t("garden_map.area_label", area: number_with_precision(@bed.area_sqm, precision: 1)) %><% end %>
+</p>
+
+<p>
+  <%= link_to t("common.back"), garden_beds_path, class: "btn btn-secondary" %>
+  <%= link_to t("common.edit"), edit_garden_bed_path(@bed), class: "btn btn-secondary" %>
+  <%= link_to t("garden_bed.map_link"), garden_map_path, class: "btn btn-secondary" %>
+</p>
+
+<% if @bed.notes.present? %><div class="card"><%= simple_format(@bed.notes) %></div><% end %>
+
+<%# ---- companion conflict warnings (Phase 3) ---------------------------- %>
+<% conflicts = companion_conflicts_for(@plantings) %>
+<% if conflicts.any? %>
+  <div class="card" style="border-left:3px solid var(--warning)">
+    <strong><%= t("garden_bed.conflicts_heading") %></strong>
+    <ul>
+      <% conflicts.each do |planting, bad_keys| %>
+        <li>
+          <%= t("garden_bed.conflict_line",
+                 plant: planting.common_name,
+                 others: bad_keys.map { |k| garden_crop_label(k) }.to_sentence) %>
+        </li>
+      <% end %>
+    </ul>
+  </div>
+<% end %>
+
+<%# ---- plantings in this bed ------------------------------------------- %>
+<div class="card">
+  <h2><%= t("garden_bed.plantings_heading") %></h2>
+  <% if @plantings.any? %>
+    <table>
+      <thead>
+        <tr>
+          <th><%= t("planting.table.plant") %></th>
+          <th><%= t("planting.table.qty") %></th>
+          <th><%= t("planting.table.status") %></th>
+          <th></th>
+        </tr>
+      </thead>
+      <tbody>
+        <% @plantings.each do |planting| %>
+          <tr>
+            <td><%= link_to planting.common_name, plant_path(planting.plant) %></td>
+            <td><%= planting.quantity %></td>
+            <td>
+              <span class="pill <%= 'warn' if planting.awaiting_sowing? %>">
+                <%= t("planting.statuses.#{planting.status}") %>
+              </span>
+            </td>
+            <td style="white-space:nowrap">
+              <% if (label = planting_advance_label(planting)) %>
+                <%= button_to label, advance_planting_path(planting),
+                              class: "btn btn-sm", form: { style: "display:inline" } %>
+              <% end %>
+              <%= button_to t("common.delete"), planting_path(planting), method: :delete,
+                            class: "btn btn-sm btn-danger", form: { style: "display:inline" },
+                            data: { turbo_confirm: t("planting.confirm_delete") } %>
+            </td>
+          </tr>
+        <% end %>
+      </tbody>
+    </table>
+  <% else %>
+    <p><%= t("garden_bed.no_plantings") %></p>
+  <% end %>
+
+  <%# ---- add a plant to this bed ------------------------------------- %>
+  <% if @plants.any? %>
+    <%= form_with url: plantings_path, method: :post, local: true do %>
+      <%= hidden_field_tag "planting[garden_bed_id]", @bed.id %>
+      <p>
+        <%= label_tag "planting_plant_id", t("planting.field.plant") %><br>
+        <%= select_tag "planting[plant_id]",
+                       options_from_collection_for_select(@plants, :id, :common_name),
+                       prompt: t("planting.field.plant_prompt") %>
+        <%= number_field_tag "planting[quantity]", 1, min: 1, style: "width:5rem" %>
+        <%= submit_tag t("planting.add_button"), class: "btn" %>
+      </p>
+    <% end %>
+  <% else %>
+    <p class="caption">
+      <%= t("planting.need_plants") %>
+      <%= link_to t("garden_bed.catalog_link"), plants_path %>
+    </p>
+  <% end %>
+</div>

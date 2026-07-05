@@ -1,0 +1,10 @@
+<%# Re-render the affected columns after a board move -- the server-side
+    renumber (and freshly computed counts/costs) are the source of truth. %>
+<%= turbo_stream.replace dom_id(@source_status, :column) do %>
+  <%= render "column", status: @source_status %>
+<% end %>
+<% if @target_status != @source_status %>
+  <%= turbo_stream.replace dom_id(@target_status, :column) do %>
+    <%= render "column", status: @target_status %>
+  <% end %>
+<% end %>

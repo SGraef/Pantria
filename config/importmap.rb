@@ -16,4 +16,13 @@ pin "@zxing/browser",  to: "@zxing--browser.js"
 pin "@zxing/library",  to: "@zxing--library.js"
 pin "ts-custom-error", to: "ts-custom-error.js"
 
+# Leaflet map library for the garden map (lazy-imported by
+# garden_map_controller only, so other pages never download it). Vendored
+# same-origin like zxing above. Updating: re-fetch
+# https://cdn.jsdelivr.net/npm/leaflet@<version>/dist/leaflet-src.esm.js
+# (dependency-free ESM, no import rewrites needed) plus dist/leaflet.css into
+# app/assets/stylesheets/ -- and re-remove the url(images/...) rules there;
+# we ship none of Leaflet's images.
+pin "leaflet", to: "leaflet.js"
+
 pin_all_from "app/javascript/controllers", under: "controllers"

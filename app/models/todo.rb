@@ -23,6 +23,7 @@ class Todo < ApplicationRecord
   belongs_to :assignee, class_name: "User", optional: true
   belongs_to :source_calendar_event, class_name: "CalendarEvent", optional: true
   belongs_to :source_document, class_name: "Document", optional: true
+  belongs_to :project, optional: true
 
   has_many :todo_comments, -> { order(:created_at) }, dependent: :destroy
   has_many :todo_follows, dependent: :destroy
@@ -32,6 +33,7 @@ class Todo < ApplicationRecord
   validates :status, inclusion: { in: STATES }
   validates :source, inclusion: { in: SOURCES }
   validate  :assignee_in_household
+  validate  :project_in_household
 
   scope :open_state,   -> { where(status: "open") }
   scope :in_progress,  -> { where(status: "in_progress") }
@@ -87,5 +89,12 @@ class Todo < ApplicationRecord
     return if assignee_id.nil?
 
     errors.add(:assignee, :not_a_member) unless household&.users&.exists?(id: assignee_id)
+  end
+
+  # An attached project must belong to the same household.
+  def project_in_household
+    return if project.nil? || project.household_id == household_id
+
+    errors.add(:project, :invalid)
   end
 end

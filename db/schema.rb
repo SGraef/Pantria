@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2026_06_27_000001) do
+ActiveRecord::Schema[8.0].define(version: 2026_07_06_100002) do
   create_table "active_storage_attachments", charset: "utf8mb4", collation: "utf8mb4_0900_ai_ci", force: :cascade do |t|
     t.string "name", null: false
     t.string "record_type", null: false
@@ -110,7 +110,7 @@ ActiveRecord::Schema[8.0].define(version: 2026_06_27_000001) do
     t.index ["source_record_type", "source_record_id"], name: "index_calendar_events_on_source_record"
   end
 
-  create_table "documents", charset: "utf8mb4", collation: "utf8mb4_0900_ai_ci", force: :cascade do |t|
+  create_table "documents", charset: "utf8mb4", collation: "utf8mb4_unicode_ci", force: :cascade do |t|
     t.bigint "household_id", null: false
     t.bigint "user_id"
     t.string "title", null: false
@@ -135,6 +135,54 @@ ActiveRecord::Schema[8.0].define(version: 2026_06_27_000001) do
     t.index ["household_id"], name: "index_documents_on_household_id"
     t.index ["paperless_document_id"], name: "index_documents_on_paperless_document_id"
     t.index ["user_id"], name: "index_documents_on_user_id"
+  end
+
+  create_table "garden_beds", charset: "utf8mb4", collation: "utf8mb4_unicode_ci", force: :cascade do |t|
+    t.bigint "household_id", null: false
+    t.string "name", null: false
+    t.string "location"
+    t.string "sun_exposure"
+    t.text "notes"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.decimal "width_m", precision: 6, scale: 2
+    t.decimal "length_m", precision: 6, scale: 2
+    t.decimal "pos_x_m", precision: 7, scale: 2
+    t.decimal "pos_y_m", precision: 7, scale: 2
+    t.decimal "area_sqm", precision: 8, scale: 2
+    t.index ["household_id", "name"], name: "index_garden_beds_on_household_id_and_name"
+    t.index ["household_id"], name: "index_garden_beds_on_household_id"
+  end
+
+  create_table "garden_connections", charset: "utf8mb4", collation: "utf8mb4_unicode_ci", force: :cascade do |t|
+    t.bigint "household_id", null: false
+    t.text "api_key"
+    t.string "hardiness_zone"
+    t.string "region"
+    t.string "last_error", limit: 1000
+    t.datetime "last_synced_at"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["household_id"], name: "index_garden_connections_on_household_id", unique: true
+  end
+
+  create_table "garden_map_settings", charset: "utf8mb4", collation: "utf8mb4_unicode_ci", force: :cascade do |t|
+    t.bigint "household_id", null: false
+    t.string "mode", default: "map", null: false
+    t.string "bundesland", default: "ni"
+    t.decimal "center_lat", precision: 10, scale: 7
+    t.decimal "center_lng", precision: 10, scale: 7
+    t.integer "zoom"
+    t.string "custom_dop_url", limit: 500
+    t.string "custom_dop_layer"
+    t.string "custom_alkis_url", limit: 500
+    t.string "custom_alkis_layer"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.string "address", limit: 200
+    t.json "property_boundary"
+    t.decimal "property_area_sqm", precision: 10, scale: 2
+    t.index ["household_id"], name: "index_garden_map_settings_on_household_id", unique: true
   end
 
   create_table "grocery_items", charset: "utf8mb4", collation: "utf8mb4_0900_ai_ci", force: :cascade do |t|
@@ -200,7 +248,7 @@ ActiveRecord::Schema[8.0].define(version: 2026_06_27_000001) do
     t.index ["token_digest"], name: "index_invitations_on_token_digest", unique: true
   end
 
-  create_table "loans", charset: "utf8mb4", collation: "utf8mb4_0900_ai_ci", force: :cascade do |t|
+  create_table "loans", charset: "utf8mb4", collation: "utf8mb4_unicode_ci", force: :cascade do |t|
     t.bigint "household_id", null: false
     t.string "item", null: false
     t.string "counterparty", null: false
@@ -364,7 +412,7 @@ ActiveRecord::Schema[8.0].define(version: 2026_06_27_000001) do
     t.index ["store_id"], name: "index_offers_on_store_id"
   end
 
-  create_table "paperless_connections", charset: "utf8mb4", collation: "utf8mb4_0900_ai_ci", force: :cascade do |t|
+  create_table "paperless_connections", charset: "utf8mb4", collation: "utf8mb4_unicode_ci", force: :cascade do |t|
     t.bigint "household_id", null: false
     t.string "base_url", null: false
     t.text "api_token"
@@ -375,6 +423,52 @@ ActiveRecord::Schema[8.0].define(version: 2026_06_27_000001) do
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.index ["household_id"], name: "index_paperless_connections_on_household_id", unique: true
+  end
+
+  create_table "plantings", charset: "utf8mb4", collation: "utf8mb4_unicode_ci", force: :cascade do |t|
+    t.bigint "household_id", null: false
+    t.bigint "garden_bed_id", null: false
+    t.bigint "plant_id", null: false
+    t.integer "quantity", default: 1, null: false
+    t.string "status", default: "planned", null: false
+    t.date "sown_on"
+    t.date "planted_out_on"
+    t.date "expected_harvest_on"
+    t.date "harvested_on"
+    t.text "notes"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["garden_bed_id"], name: "index_plantings_on_garden_bed_id"
+    t.index ["household_id", "status"], name: "index_plantings_on_household_id_and_status"
+    t.index ["household_id"], name: "index_plantings_on_household_id"
+    t.index ["plant_id"], name: "index_plantings_on_plant_id"
+  end
+
+  create_table "plants", charset: "utf8mb4", collation: "utf8mb4_unicode_ci", force: :cascade do |t|
+    t.bigint "household_id", null: false
+    t.integer "perenual_id"
+    t.string "common_name", null: false
+    t.string "scientific_name"
+    t.string "crop_key"
+    t.string "cycle"
+    t.string "sunlight"
+    t.string "watering"
+    t.integer "hardiness_min"
+    t.integer "hardiness_max"
+    t.boolean "edible", default: false, null: false
+    t.string "image_url"
+    t.string "external_url"
+    t.integer "sow_from_month"
+    t.integer "sow_to_month"
+    t.integer "harvest_from_month"
+    t.integer "harvest_to_month"
+    t.text "notes"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["household_id", "common_name"], name: "index_plants_on_household_id_and_common_name"
+    t.index ["household_id", "crop_key"], name: "index_plants_on_household_id_and_crop_key"
+    t.index ["household_id", "perenual_id"], name: "index_plants_on_household_id_and_perenual_id"
+    t.index ["household_id"], name: "index_plants_on_household_id"
   end
 
   create_table "prices", charset: "utf8mb4", collation: "utf8mb4_0900_ai_ci", force: :cascade do |t|
@@ -428,6 +522,107 @@ ActiveRecord::Schema[8.0].define(version: 2026_06_27_000001) do
     t.index ["barcode"], name: "index_products_on_barcode"
     t.index ["household_id", "barcode"], name: "idx_products_household_barcode", unique: true
     t.index ["household_id"], name: "index_products_on_household_id"
+  end
+
+  create_table "project_categories", charset: "utf8mb4", collation: "utf8mb4_unicode_ci", force: :cascade do |t|
+    t.bigint "household_id", null: false
+    t.string "name", null: false
+    t.integer "position", default: 0, null: false
+    t.string "color"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["household_id", "name"], name: "index_project_categories_on_household_id_and_name", unique: true
+    t.index ["household_id", "position"], name: "index_project_categories_on_household_id_and_position"
+    t.index ["household_id"], name: "index_project_categories_on_household_id"
+  end
+
+  create_table "project_discussion_comments", charset: "utf8mb4", collation: "utf8mb4_unicode_ci", force: :cascade do |t|
+    t.bigint "household_id", null: false
+    t.bigint "project_discussion_id", null: false
+    t.bigint "user_id"
+    t.text "body", null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["household_id"], name: "index_project_discussion_comments_on_household_id"
+    t.index ["project_discussion_id"], name: "index_project_discussion_comments_on_project_discussion_id"
+    t.index ["user_id"], name: "index_project_discussion_comments_on_user_id"
+  end
+
+  create_table "project_discussions", charset: "utf8mb4", collation: "utf8mb4_unicode_ci", force: :cascade do |t|
+    t.bigint "household_id", null: false
+    t.bigint "project_id", null: false
+    t.string "title", null: false
+    t.string "status", default: "open", null: false
+    t.bigint "creator_id"
+    t.datetime "resolved_at"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["creator_id"], name: "index_project_discussions_on_creator_id"
+    t.index ["household_id"], name: "index_project_discussions_on_household_id"
+    t.index ["project_id", "status"], name: "index_project_discussions_on_project_id_and_status"
+    t.index ["project_id"], name: "index_project_discussions_on_project_id"
+  end
+
+  create_table "project_items", charset: "utf8mb4", collation: "utf8mb4_unicode_ci", force: :cascade do |t|
+    t.bigint "household_id", null: false
+    t.bigint "project_id", null: false
+    t.string "kind", null: false
+    t.string "name", null: false
+    t.string "url"
+    t.integer "cost_cents"
+    t.text "notes"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["household_id"], name: "index_project_items_on_household_id"
+    t.index ["project_id", "kind"], name: "index_project_items_on_project_id_and_kind"
+    t.index ["project_id"], name: "index_project_items_on_project_id"
+  end
+
+  create_table "project_relations", charset: "utf8mb4", collation: "utf8mb4_unicode_ci", force: :cascade do |t|
+    t.bigint "household_id", null: false
+    t.bigint "project_id", null: false
+    t.bigint "related_project_id", null: false
+    t.string "kind", null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["household_id"], name: "index_project_relations_on_household_id"
+    t.index ["project_id", "related_project_id", "kind"], name: "index_project_relations_uniqueness", unique: true
+    t.index ["project_id"], name: "index_project_relations_on_project_id"
+    t.index ["related_project_id"], name: "index_project_relations_on_related_project_id"
+  end
+
+  create_table "project_statuses", charset: "utf8mb4", collation: "utf8mb4_unicode_ci", force: :cascade do |t|
+    t.bigint "household_id", null: false
+    t.string "name", null: false
+    t.integer "position", default: 0, null: false
+    t.string "color"
+    t.boolean "done", default: false, null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["household_id", "name"], name: "index_project_statuses_on_household_id_and_name", unique: true
+    t.index ["household_id", "position"], name: "index_project_statuses_on_household_id_and_position"
+    t.index ["household_id"], name: "index_project_statuses_on_household_id"
+  end
+
+  create_table "projects", charset: "utf8mb4", collation: "utf8mb4_unicode_ci", force: :cascade do |t|
+    t.bigint "household_id", null: false
+    t.string "name", null: false
+    t.text "description"
+    t.bigint "project_status_id", null: false
+    t.bigint "project_category_id"
+    t.bigint "parent_id"
+    t.integer "budget_cents"
+    t.string "currency", limit: 3, default: "EUR", null: false
+    t.integer "position", default: 0, null: false
+    t.bigint "creator_id"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["creator_id"], name: "index_projects_on_creator_id"
+    t.index ["household_id", "project_status_id", "position"], name: "index_projects_on_board_order"
+    t.index ["household_id"], name: "index_projects_on_household_id"
+    t.index ["parent_id"], name: "index_projects_on_parent_id"
+    t.index ["project_category_id"], name: "index_projects_on_project_category_id"
+    t.index ["project_status_id"], name: "index_projects_on_project_status_id"
   end
 
   create_table "push_subscriptions", charset: "utf8mb4", collation: "utf8mb4_0900_ai_ci", force: :cascade do |t|
@@ -722,11 +917,13 @@ ActiveRecord::Schema[8.0].define(version: 2026_06_27_000001) do
     t.string "source", default: "manual", null: false
     t.bigint "source_calendar_event_id"
     t.bigint "source_document_id"
+    t.bigint "project_id"
     t.index ["assignee_id"], name: "index_todos_on_assignee_id"
     t.index ["creator_id"], name: "index_todos_on_creator_id"
     t.index ["household_id", "due_on"], name: "index_todos_on_household_id_and_due_on"
     t.index ["household_id", "status"], name: "index_todos_on_household_id_and_status"
     t.index ["household_id"], name: "index_todos_on_household_id"
+    t.index ["project_id"], name: "index_todos_on_project_id"
     t.index ["source_calendar_event_id"], name: "index_todos_on_source_calendar_event_id"
     t.index ["source_document_id"], name: "index_todos_on_source_document_id"
   end
@@ -763,6 +960,9 @@ ActiveRecord::Schema[8.0].define(version: 2026_06_27_000001) do
   add_foreign_key "calendar_events", "households"
   add_foreign_key "documents", "households"
   add_foreign_key "documents", "users"
+  add_foreign_key "garden_beds", "households"
+  add_foreign_key "garden_connections", "households"
+  add_foreign_key "garden_map_settings", "households"
   add_foreign_key "grocery_items", "households"
   add_foreign_key "grocery_items", "products"
   add_foreign_key "grocery_items", "stores"
@@ -789,11 +989,33 @@ ActiveRecord::Schema[8.0].define(version: 2026_06_27_000001) do
   add_foreign_key "offers", "products", on_delete: :nullify
   add_foreign_key "offers", "stores", on_delete: :nullify
   add_foreign_key "paperless_connections", "households"
+  add_foreign_key "plantings", "garden_beds"
+  add_foreign_key "plantings", "households"
+  add_foreign_key "plantings", "plants"
+  add_foreign_key "plants", "households"
   add_foreign_key "prices", "products"
   add_foreign_key "prices", "stores"
   add_foreign_key "product_barcodes", "products"
   add_foreign_key "product_synonyms", "products"
   add_foreign_key "products", "households"
+  add_foreign_key "project_categories", "households"
+  add_foreign_key "project_discussion_comments", "households"
+  add_foreign_key "project_discussion_comments", "project_discussions"
+  add_foreign_key "project_discussion_comments", "users"
+  add_foreign_key "project_discussions", "households"
+  add_foreign_key "project_discussions", "projects"
+  add_foreign_key "project_discussions", "users", column: "creator_id"
+  add_foreign_key "project_items", "households"
+  add_foreign_key "project_items", "projects"
+  add_foreign_key "project_relations", "households"
+  add_foreign_key "project_relations", "projects"
+  add_foreign_key "project_relations", "projects", column: "related_project_id"
+  add_foreign_key "project_statuses", "households"
+  add_foreign_key "projects", "households"
+  add_foreign_key "projects", "project_categories"
+  add_foreign_key "projects", "project_statuses"
+  add_foreign_key "projects", "projects", column: "parent_id"
+  add_foreign_key "projects", "users", column: "creator_id"
   add_foreign_key "push_subscriptions", "households"
   add_foreign_key "push_subscriptions", "users"
   add_foreign_key "receipt_line_items", "products"
@@ -824,6 +1046,7 @@ ActiveRecord::Schema[8.0].define(version: 2026_06_27_000001) do
   add_foreign_key "todos", "calendar_events", column: "source_calendar_event_id"
   add_foreign_key "todos", "documents", column: "source_document_id"
   add_foreign_key "todos", "households"
+  add_foreign_key "todos", "projects"
   add_foreign_key "todos", "users", column: "assignee_id"
   add_foreign_key "todos", "users", column: "creator_id"
 end
